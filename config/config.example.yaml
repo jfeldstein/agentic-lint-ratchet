@@ -1,0 +1,10 @@
+# Copy into a Kubernetes ConfigMap (or build from Helm values). Paths are pod-local.
+
+repo:
+  repository: "invisible-tech/agentic-construct"
+  base_branch: "develop"
+  # Checkout directory inside the ratchet worker pod (emptyDir or PVC).
+  local_path: "/workspace/agentic-construct"
+
+setup:
+  max_fix_files_without_ignore: 10
