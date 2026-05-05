@@ -14,9 +14,12 @@ inputs:
     required: false
     default: main
   config_path:
-    description: Path to lint-ratchet config.yaml used to derive signature + dedupe PRs
+    description: >
+      Path to the lint-ratchet config file (relative to target repo root).
+      Overridden by the LINT_RATCHET_CONFIG_PATH env var if set.
+      If the file does not exist, the dedupe preflight is skipped (fresh repo).
     required: false
-    default: config.yaml
+    default: .lint-ratchet.config.yml
   prompt_file:
     description: Prompt markdown file path (relative to the runner checkout)
     required: false
@@ -78,16 +81,19 @@ runs:
         GH_TOKEN: ${{ github.token }}
       run: |
         set -euo pipefail
-        CONFIG_PATH="${{ inputs.config_path }}"
+
+        # LINT_RATCHET_CONFIG_PATH env overrides the action input.
+        CONFIG_PATH="${LINT_RATCHET_CONFIG_PATH:-${{ inputs.config_path }}}"
 
         if [[ ! -f "$CONFIG_PATH" ]]; then
-          echo "No $CONFIG_PATH found; skipping dedupe preflight."
+          echo "No config file found at '$CONFIG_PATH'; skipping dedupe preflight (fresh repo)."
           echo "should_run=true" >> "$GITHUB_OUTPUT"
           exit 0
         fi
 
         CONFIG_ABS="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$CONFIG_PATH")"
         LINT_RATCHET_SIGNATURE="#lint-ratchet-$(shasum -a 256 "$CONFIG_ABS" | awk '{print $1}')"
+        echo "Config: $CONFIG_ABS"
         echo "Signature: $LINT_RATCHET_SIGNATURE"
         echo "LINT_RATCHET_CONFIG_PATH=$CONFIG_ABS" >> "$GITHUB_ENV"
         echo "LINT_RATCHET_SIGNATURE=$LINT_RATCHET_SIGNATURE" >> "$GITHUB_ENV"

@@ -10,7 +10,7 @@ The `**systemPrompt**` is **[PROMPT.md](PROMPT.md)** (from `agentic-pocs/project
 python3 scripts/sync_prompt_to_values.py
 ```
 
-Target repo and base branch for the **lint-ratchet config contract** are illustrated in **[config/config.example.yaml](config/config.example.yaml)**.
+The lint-ratchet config contract is illustrated in **[config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml)**. Copy it to **`.lint-ratchet.config.yml`** at the root of your target repository. Override the path via the `LINT_RATCHET_CONFIG_PATH` env var or the `config_path` action input.
 
 ## GitHub Actions (cron PR bot)
 

@@ -1,8 +1,17 @@
 #!/usr/bin/env bats
 
 @test "preflight uses realpath for config (no naive PWD prefix)" {
-  # This is a static check: ensure we use python realpath (covers abs paths too).
   run bash -lc "grep -n \"os.path.realpath\" .github/actions/lint-ratchet/action.yml"
+  [ "$status" -eq 0 ]
+}
+
+@test "preflight default config path is .lint-ratchet.config.yml" {
+  run bash -lc "grep -n \".lint-ratchet.config.yml\" .github/actions/lint-ratchet/action.yml"
+  [ "$status" -eq 0 ]
+}
+
+@test "preflight honours LINT_RATCHET_CONFIG_PATH env override" {
+  run bash -lc "grep -n \"LINT_RATCHET_CONFIG_PATH:-\" .github/actions/lint-ratchet/action.yml"
   [ "$status" -eq 0 ]
 }
 

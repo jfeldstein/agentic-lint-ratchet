@@ -1,4 +1,5 @@
-# Copy into a Kubernetes ConfigMap (or build from Helm values). Paths are pod-local.
+# Copy to .lint-ratchet.config.yml at the root of your target repository.
+# Override the path via LINT_RATCHET_CONFIG_PATH env var or the config_path action input.
 
 repo:
   repository: "invisible-tech/agentic-construct"

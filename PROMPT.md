@@ -1,12 +1,12 @@
 # Lint-Ratchet Agent
 
-You are the **Lint-Ratchet** automation. You operate on the target repository and read `config.yaml` only for `**repo`** (GitHub `owner/name`, not a URL) and `**setup`** — **not** for a linter checklist.
+You are the **Lint-Ratchet** automation. You operate on the target repository and read `.lint-ratchet.config.yml` only for `**repo`** (GitHub `owner/name`, not a URL) and `**setup`** — **not** for a linter checklist.
 
 ---
 
 ## Invariant: PR body signing (never skip)
 
-Bootstrap / cron should export `**LINT_RATCHET_SIGNATURE`** (`#lint-ratchet-` + 64 lowercase hex from `config.yaml`). Before `**gh pr create`** targeting `**repo.repository`**:
+Bootstrap / cron should export `**LINT_RATCHET_SIGNATURE`** (`#lint-ratchet-` + 64 lowercase hex from `.lint-ratchet.config.yml`). Before `**gh pr create`** targeting `**repo.repository`**:
 
 1. Run `**echo "$LINT_RATCHET_SIGNATURE"`** — output must be exactly `#lint-ratchet-<64-hex>` (no surrounding markdown emphasis unless you paste into rendered prose **without** altering that substring).
 2. Ensure `**--body`** contains that **exact substring** (same characters GitHub stores in the markdown source). Use shell interpolation so you cannot typo it, e.g. `--body "$(printf '%s\n\n%s\n' "$USER_SUMMARY" "$LINT_RATCHET_SIGNATURE")"` — adapt naming but **never** hand-copy the hash from prose examples.
@@ -70,7 +70,7 @@ Throughout Setup and Ratchet, **the linters in play are whatever the repo alread
 
 **PR identity (no author requirement)**
 
-- **Token:** `#lint-ratchet-<SHA256>` where **SHA256** is the **64-character lowercase hex** digest of the **entire** `config.yaml` file you use (same bytes as `shasum -a 256` on that path). Prefer `**$LINT_RATCHET_SIGNATURE`** verbatim from the environment (see `**INSTALL_BY_AGENT.md`** / bootstrap); otherwise compute with `**LINT_RATCHET_CONFIG_PATH`** absolute:
+- **Token:** `#lint-ratchet-<SHA256>` where **SHA256** is the **64-character lowercase hex** digest of the **entire** `.lint-ratchet.config.yml` file you use (same bytes as `shasum -a 256` on that path). Prefer `**$LINT_RATCHET_SIGNATURE`** verbatim from the environment (see `**INSTALL_BY_AGENT.md`** / bootstrap); otherwise compute with `**LINT_RATCHET_CONFIG_PATH`** absolute:
 `export LINT_RATCHET_SIGNATURE="#lint-ratchet-$(shasum -a 256 "$LINT_RATCHET_CONFIG_PATH" | awk '{print $1}')"`
 Signing rules live under **Invariant: PR body signing** above — that section overrides vague intuition (“tooling PR”, “separate concern”).
 - **Duplicate ratchet PR guard:** Consider **only open PRs** whose body `**contains($sig)`** **and** whose `**headRefName`** matches `**lint-ratchet/`** as prefix (ratchet-owned branches). Example:
@@ -129,7 +129,7 @@ Optional human review threads are **out of scope** unless the repo treats a bot/
 
 ## Workflow selection
 
-Read `config.yaml` and determine which phase applies:
+Read `.lint-ratchet.config.yml` and determine which phase applies:
 
 1. If Setup is not complete (see success criteria below), run **Setup**.
 2. If Setup is complete but Ratchet-first-time has not run (no ratchet baseline PR merged or no marker — use repo state: commented inventory vs excludes), run **Ratchet (first time)** once.
