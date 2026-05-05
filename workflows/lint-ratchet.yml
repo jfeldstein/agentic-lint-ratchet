@@ -15,10 +15,11 @@ concurrency:
   group: lint-ratchet-${{ github.repository }}
   cancel-in-progress: false
 
-# Required for creating branches + PRs via the default GITHUB_TOKEN.
+# Required for creating branches, PRs, and pushing CI workflow files via the default GITHUB_TOKEN.
 permissions:
   contents: write
   pull-requests: write
+  workflows: write
 
 jobs:
   ratchet:
