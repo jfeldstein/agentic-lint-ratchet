@@ -22,6 +22,25 @@ export LINT_RATCHET_SIGNATURE="#lint-ratchet-$(shasum -a 256 "$LINT_RATCHET_CONF
 
 ---
 
+## Invariant: no inline suppression comments (never skip)
+
+**Inline linter suppression comments in source files are banned at all times.** This means you must never add directives such as:
+
+- Python: `# noqa: ...`, `# type: ignore`
+- JavaScript / TypeScript: `// eslint-disable-line`, `// eslint-disable-next-line`, `/* eslint-disable */`, `/* eslint-enable */`
+- Go: `//nolint:...`
+- Rust: `#[allow(...)]` added solely to silence a lint
+- Java / Kotlin: `@SuppressWarnings(...)`
+- Any equivalent per-line, per-block, or per-file suppression directive in any language
+
+**Violations must be fixed in the code.** If a lint rule fires, correct the underlying issue — refactor, rewrite, or restructure as needed. Do not silence the diagnostic.
+
+**The only permitted suppression mechanism is config-level path exclusions** (e.g. `exclude = [...]` in `.ruff.toml`, entries in `.eslintignore`, `skip-dirs` in `.golangci.yml`). Those are used exclusively in Setup step 3B when the file count exceeds `setup.max_fix_files_without_ignore`, and they are removed incrementally during Ratchet — they are not a substitute for fixing code.
+
+There are **no carve-outs**: not for "legacy files", "generated code" (unless the path is excluded at config level for a documented reason), "quick fixes", or "outside the ratchet scope". Every source file you touch or create must be free of inline suppression comments.
+
+---
+
 ## Linters (discovery; nothing listed in config)
 
 **Keep what exists.** Infer active tooling from the repo: manifests (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, etc.), existing config files (`eslint.config.`*, `.eslintrc*`, `ruff.toml`, `.golangci.yml`, CI workflows). Continue using those linters, configs, and scripts unless you must add missing coverage.
@@ -138,8 +157,8 @@ If scope is not yet fully explicit per **Scope before tighten** and **Global rul
   If there is no CI job that runs the linter(s) and fails on reported issues, add one that runs on **each PR**.  
   - If there are **existing linter failures**:  
     - **A)** If they touch **≤ `setup.max_fix_files_without_ignore`** files (default 10), **fix** them in this PR.  
-    - **B)** If **more** than that many files, add **ignore rules** / suppressions so the PR passes **without** fixing everything at once.  
-     **Success for this PR:** lint runs in CI and **passes** (including via intentional ignores).
+    - **B)** If **more** than that many files, add **config-level path exclusions** (e.g. `exclude = [...]` in the linter config, `.eslintignore` entries, `skip-dirs` in golangci-lint) so the PR passes **without** fixing everything at once. **Never** add inline suppression comments to source files (see **Invariant: no inline suppression comments**).  
+     **Success for this PR:** lint runs in CI and **passes** (including via intentional config-level exclusions).
 
 When the success criteria above are met, Setup is done: linters installed, lint CI on PRs, CI passes (possibly with broad exclusions or ignores).
 
@@ -165,7 +184,7 @@ When the success criteria above are met, Setup is done: linters installed, lint 
 1. **Open PR guard** — Run **duplicate ratchet PR guard** from **PR identity** (only `**lint-ratchet/`*** heads). If one exists with failing/pending required checks, **babysit** it. If one exists and checks are green, *do not open another `lint-ratchet/` slice PR** until merge — other branches may proceed; **every** PR body still needs `**$LINT_RATCHET_SIGNATURE`** per **Invariant: PR body signing**.
 2. **If path scope is incomplete, broaden first** — If any intended source area is still **implicitly** outside the linter map (not explicitly included, excluded, or listed in the commented queue), **do not** tighten rules yet. **Broaden** excludes / includes / inventory per **Scope before tighten** until the full intended surface is represented; open a PR for that if needed.  
 3. **Aggregate scope slices, then fix** — Following the commented queue, **apply the next leaf** (remove an exclude or enable an include) **or**, only when path scope is already complete, tighten the **next** rule threshold / suppression. After each leaf, run **linters**. **While** violations are absent—or only resolvable by changing linter-config files—**continue applying the next leaf** in order, **aggregating** all such config changes on this branch. **When** linters report issues that require edits to **source files** (see **Global rules**), stop aggregating further leaves for this PR; fix all violations (source and any final config edits needed). If the queue ends before any source-file violations appear, commit the **aggregated** config scope advance as **one** PR.
-4. Run **linters**; fix all issues.
+4. Run **linters**; fix all issues in the code — **never** add inline suppression comments (see **Invariant: no inline suppression comments**).
 5. Run the **full test suite**; fix failures.
 6. Run **linters again**; ensure test fixes did not introduce lint violations.
 7. **Commit** (conventional subject) and open **PR** (title matches subject; description includes `LINT_RATCHET_SIGNATURE`). Then **PR babysitting** until required checks are green.
