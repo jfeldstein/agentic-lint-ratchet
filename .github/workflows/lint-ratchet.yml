@@ -8,6 +8,11 @@ on:
     # Once per day at 06:15 UTC (adjust as needed)
     - cron: "15 6 * * *"
   workflow_dispatch:
+    inputs:
+      cursor_api_key:
+        description: "Cursor API key (overrides CURSOR_API_KEY secret)"
+        required: false
+        type: string
 
 concurrency:
   group: lint-ratchet-${{ github.repository }}
@@ -25,4 +30,4 @@ jobs:
       - name: Run lint-ratchet (composite action)
         uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
         with:
-          cursor_api_key: ${{ secrets.CURSOR_API_KEY }}
+          cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
