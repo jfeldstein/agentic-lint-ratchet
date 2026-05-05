@@ -1,0 +1,9 @@
+# Lint-ratchet contract for this repository (consumed by scheduled composite action default config_path).
+
+repo:
+  repository: jfeldstein/agentic-lint-ratchet
+  base_branch: main
+  local_path: /workspace/target
+
+setup:
+  max_fix_files_without_ignore: 10

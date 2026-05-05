@@ -6,6 +6,7 @@
   "description": "Helm chart and optional GitHub Actions cron for lint-ratchet automation",
   "scripts": {
     "ratchet": "node scripts/run-ratchet.mjs",
+    "lint:js": "eslint scripts/**/*.mjs",
     "test": "bats --recursive test"
   },
   "repository": {
@@ -17,6 +18,9 @@
     "@cursor/sdk": "1.0.12"
   },
   "devDependencies": {
-    "bats": "1.13.0"
+    "@eslint/js": "9.26.0",
+    "bats": "1.13.0",
+    "eslint": "9.26.0",
+    "globals": "16.0.0"
   }
 }
