@@ -77,7 +77,10 @@ try {
   process.exit(0);
 } catch (err) {
   if (err instanceof CursorAgentError) {
-    console.error(`Cursor agent error: ${err.message} (retryable=${err.isRetryable})`);
+    console.error(`Cursor agent error: ${err.message}`);
+    console.error(`  retryable: ${err.isRetryable}`);
+    console.error(`  code:      ${err.code ?? "(none)"}`);
+    console.error(`  cause:     ${err.cause ?? "(none)"}`);
     process.exit(1);
   }
   throw err;
