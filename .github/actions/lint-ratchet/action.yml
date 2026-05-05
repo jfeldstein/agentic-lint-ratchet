@@ -33,6 +33,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Mask API key
+      shell: bash
+      run: echo "::add-mask::${{ inputs.cursor_api_key }}"
+
     - name: Checkout target repository
       uses: actions/checkout@v4
       with:

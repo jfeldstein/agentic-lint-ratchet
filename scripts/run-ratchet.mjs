@@ -1,5 +1,5 @@
 /**
- * Reads PROMPT.md (or RATCHET_PROMPT_FILE) and runs one-shot Cursor agent via @cursor/sdk.
+ * Reads PROMPT.md (or RATCHET_PROMPT_FILE) and runs a streaming Cursor agent via @cursor/sdk.
  * Intended for GitHub Actions with CURSOR_API_KEY from repository secrets.
  */
 import { readFileSync, existsSync } from "node:fs";
@@ -38,36 +38,49 @@ const prompt = readPromptOrExit({ cwd });
 const apiKey = getCursorApiKeyOrExit();
 const modelId = process.env.CURSOR_MODEL || "composer-2";
 
+let agent;
 try {
-  const runResult = await Agent.prompt(prompt, {
+  agent = await Agent.create({
     apiKey,
     model: { id: modelId },
     local: { cwd },
   });
 
-  if (runResult.status === "error") {
-    console.error(
-      "Run finished with error status:",
-      runResult.id,
-      runResult.result ?? "",
-    );
+  console.log(`Agent started: ${agent.agentId}`);
+
+  const run = await agent.send(prompt);
+  console.log(`Run started: ${run.id}`);
+
+  for await (const event of run.stream()) {
+    if (event.type === "assistant") {
+      for (const block of event.message.content) {
+        if (block.type === "text" && block.text) {
+          process.stdout.write(block.text);
+        }
+      }
+    } else if (event.type === "tool_use") {
+      console.log(`\n[tool] ${event.name}`);
+    }
+  }
+
+  const result = await run.wait();
+
+  if (result.status === "error") {
+    console.error(`\nRun failed: ${result.id}`);
     process.exit(2);
   }
 
-  if (runResult.git?.branches?.length) {
-    console.log("Git:", JSON.stringify(runResult.git, null, 2));
+  if (result.git?.branches?.length) {
+    console.log("\nGit branches:", JSON.stringify(result.git.branches, null, 2));
   }
-  console.log("Done:", runResult.status, "run", runResult.id);
+  console.log(`\nDone: ${result.status} (run ${result.id})`);
   process.exit(0);
 } catch (err) {
   if (err instanceof CursorAgentError) {
-    console.error(
-      "Cursor agent error:",
-      err.message,
-      "retryable=",
-      err.isRetryable,
-    );
+    console.error(`Cursor agent error: ${err.message} (retryable=${err.isRetryable})`);
     process.exit(1);
   }
   throw err;
+} finally {
+  await agent?.[Symbol.asyncDispose]();
 }
