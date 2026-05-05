@@ -10,16 +10,21 @@ on:
         description: "Cursor API key (overrides CURSOR_API_KEY secret)"
         required: false
         type: string
+      github_token:
+        description: "PAT with repo+workflow scope (required to push .github/workflows/ files; overrides GH_TOKEN secret)"
+        required: false
+        type: string
 
 concurrency:
   group: lint-ratchet-${{ github.repository }}
   cancel-in-progress: false
 
-# Required for creating branches, PRs, and pushing CI workflow files via the default GITHUB_TOKEN.
+# Required for creating branches + PRs via the default GITHUB_TOKEN.
+# To allow the agent to push .github/workflows/ files, also supply a PAT with
+# `workflow` scope via the `github_token` input or a GH_TOKEN repository secret.
 permissions:
   contents: write
   pull-requests: write
-  workflows: write
 
 jobs:
   ratchet:
@@ -30,3 +35,4 @@ jobs:
         uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
+          github_token: ${{ inputs.github_token || secrets.GH_TOKEN || github.token }}
