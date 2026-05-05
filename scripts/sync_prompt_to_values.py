@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Embed PROMPT.md into values.yaml under agent.systemPrompt (literal block)."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PROMPT = ROOT / "PROMPT.md"
 VALUES = ROOT / "values.yaml"
 
-HEADER = """# agent.systemPrompt is synced from PROMPT.md — run: python3 scripts/sync_prompt_to_values.py
+HEADER = """# agent.systemPrompt is synced from PROMPT.md.
+# Regenerate: python3 scripts/sync_prompt_to_values.py
 
 """
 

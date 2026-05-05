@@ -1,0 +1,40 @@
+# Copy to `.github/workflows/ci.yml` (requires a token with **workflow** scope for git push).
+#
+# Lint scope map:
+# - Active: scripts/*.mjs (ESLint), scripts/*.py (Ruff).
+# - Deferred: Helm/YAML (templates/, Chart*.yaml, values.yaml, workflows/, actions/, .github/**/*.yml),
+#   Markdown (PROMPT.md, README.md, docs/), Bats/shell (test/*.bats).
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Lint JavaScript
+        run: npm run lint:js
+
+      - name: Lint Python
+        run: pip install ruff==0.11.10 && ruff check scripts && ruff format --check scripts
+
+      - name: Unit tests (bats)
+        run: npm test
