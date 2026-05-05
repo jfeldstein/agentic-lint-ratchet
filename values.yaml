@@ -1,5 +1,5 @@
 agent:
-  promptFile: PROMPT.md
+  systemPromptFile: PROMPT.md
   image:
     repository: declarative-agent-library-chart
     tag: local
