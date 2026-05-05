@@ -1,0 +1,115 @@
+name: Lint Ratchet (Cursor)
+description: Run the lint-ratchet Cursor agent against a checked-out repository
+
+inputs:
+  cursor_api_key:
+    description: Cursor API key (user or service account)
+    required: true
+  action_repository:
+    description: Repository that contains the lint-ratchet runner code
+    required: false
+    default: jfeldstein/agentic-lint-ratchet
+  action_ref:
+    description: Ref (branch/tag/SHA) for the lint-ratchet runner checkout
+    required: false
+    default: main
+  config_path:
+    description: Path to lint-ratchet config.yaml used to derive signature + dedupe PRs
+    required: false
+    default: config.yaml
+  prompt_file:
+    description: Prompt markdown file path (relative to the runner checkout)
+    required: false
+    default: PROMPT.md
+  cursor_model:
+    description: Cursor model id
+    required: false
+    default: composer-2
+  node_version:
+    description: Node.js version for the runner
+    required: false
+    default: "22"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout target repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        path: target
+
+    - name: Checkout lint-ratchet runner
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
+        fetch-depth: 1
+        path: lint-ratchet
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node_version }}
+        cache: npm
+        cache-dependency-path: lint-ratchet/package-lock.json
+
+    - name: Install npm dependencies
+      shell: bash
+      working-directory: lint-ratchet
+      run: npm ci
+
+    - name: Configure git identity for agent commits
+      shell: bash
+      working-directory: target
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+    - name: Preflight (dedupe) - skip if open signed lint-ratchet PR exists
+      id: preflight
+      shell: bash
+      working-directory: target
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        CONFIG_PATH="${{ inputs.config_path }}"
+
+        if [[ ! -f "$CONFIG_PATH" ]]; then
+          echo "No $CONFIG_PATH found; skipping dedupe preflight."
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        CONFIG_ABS="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$CONFIG_PATH")"
+        LINT_RATCHET_SIGNATURE="#lint-ratchet-$(shasum -a 256 "$CONFIG_ABS" | awk '{print $1}')"
+        echo "Signature: $LINT_RATCHET_SIGNATURE"
+        echo "LINT_RATCHET_CONFIG_PATH=$CONFIG_ABS" >> "$GITHUB_ENV"
+        echo "LINT_RATCHET_SIGNATURE=$LINT_RATCHET_SIGNATURE" >> "$GITHUB_ENV"
+
+        if gh pr list --repo "$GITHUB_REPOSITORY" --state open \
+          --json number,body,headRefName \
+          | jq -e --arg sig "$LINT_RATCHET_SIGNATURE" \
+              'any(.[]; (.body | contains($sig)) and (.headRefName | startswith("lint-ratchet/")))' >/dev/null; then
+          echo "Open signed lint-ratchet PR already exists; skipping run."
+          echo "should_run=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "should_run=true" >> "$GITHUB_OUTPUT"
+
+    - name: Run Lint-Ratchet Agent
+      shell: bash
+      working-directory: lint-ratchet
+      if: ${{ steps.preflight.outputs.should_run == 'true' }}
+      env:
+        CURSOR_API_KEY: ${{ inputs.cursor_api_key }}
+        GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_WORKSPACE: ${{ github.workspace }}/target
+        LINT_RATCHET_CONFIG_PATH: ${{ env.LINT_RATCHET_CONFIG_PATH }}
+        LINT_RATCHET_SIGNATURE: ${{ env.LINT_RATCHET_SIGNATURE }}
+        RATCHET_PROMPT_FILE: ${{ github.workspace }}/lint-ratchet/${{ inputs.prompt_file }}
+        CURSOR_MODEL: ${{ inputs.cursor_model }}
+      run: npm run ratchet

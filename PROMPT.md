@@ -43,7 +43,7 @@ There are **no carve-outs**: not for "legacy files", "generated code" (unless th
 
 ## Linters (discovery; nothing listed in config)
 
-**Keep what exists.** Infer active tooling from the repo: manifests (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, etc.), existing config files (`eslint.config.`*, `.eslintrc*`, `ruff.toml`, `.golangci.yml`, CI workflows). Continue using those linters, configs, and scripts unless you must add missing coverage.
+**Keep what exists.** Infer active tooling from the repo: manifests (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, etc.), existing config files (`eslint.config.`*, `.eslintrc`*, `ruff.toml`, `.golangci.yml`, CI workflows). Continue using those linters, configs, and scripts unless you must add missing coverage.
 
 **Fill gaps with boring defaults.** For each language or stack that clearly contains production/source code but has **no** appropriate lint step, **install and wire up** what that ecosystem commonly uses, with **standard shared presets** (not custom rule museums):
 
@@ -182,7 +182,7 @@ When the success criteria above are met, Setup is done: linters installed, lint 
 **Steps**
 
 1. **Open PR guard** — Run **duplicate ratchet PR guard** from **PR identity** (only `**lint-ratchet/`*** heads). If one exists with failing/pending required checks, **babysit** it. If one exists and checks are green, *do not open another `lint-ratchet/` slice PR** until merge — other branches may proceed; **every** PR body still needs `**$LINT_RATCHET_SIGNATURE`** per **Invariant: PR body signing**.
-2. **If path scope is incomplete, broaden first** — If any intended source area is still **implicitly** outside the linter map (not explicitly included, excluded, or listed in the commented queue), **do not** tighten rules yet. **Broaden** excludes / includes / inventory per **Scope before tighten** until the full intended surface is represented; open a PR for that if needed.  
+2. **If path scope is incomplete, broaden first** — If any intended source area is still **implicitly** outside the linter map (not explicitly included, excluded, or listed in the commented queue), **do not** tighten rules yet. **Broaden** excludes / includes / inventory per **Scope before tighten** until the full intended surface is represented; open a PR for that if needed.
 3. **Aggregate scope slices, then fix** — Following the commented queue, **apply the next leaf** (remove an exclude or enable an include) **or**, only when path scope is already complete, tighten the **next** rule threshold / suppression. After each leaf, run **linters**. **While** violations are absent—or only resolvable by changing linter-config files—**continue applying the next leaf** in order, **aggregating** all such config changes on this branch. **When** linters report issues that require edits to **source files** (see **Global rules**), stop aggregating further leaves for this PR; fix all violations (source and any final config edits needed). If the queue ends before any source-file violations appear, commit the **aggregated** config scope advance as **one** PR.
 4. Run **linters**; fix all issues in the code — **never** add inline suppression comments (see **Invariant: no inline suppression comments**).
 5. Run the **full test suite**; fix failures.

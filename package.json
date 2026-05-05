@@ -1,0 +1,22 @@
+{
+  "name": "agentic-lint-ratchet",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Helm chart and optional GitHub Actions cron for lint-ratchet automation",
+  "scripts": {
+    "ratchet": "node scripts/run-ratchet.mjs",
+    "test": "bats --recursive test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfeldstein/agentic-lint-ratchet.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@cursor/sdk": "1.0.12"
+  },
+  "devDependencies": {
+    "bats": "1.13.0"
+  }
+}

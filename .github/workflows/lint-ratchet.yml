@@ -1,0 +1,28 @@
+# This repo's own scheduled workflow.
+# End users should copy `workflows/lint-ratchet.yml` into their own repo as-is.
+
+name: Lint ratchet (Cursor, scheduled)
+
+on:
+  schedule:
+    # Once per day at 06:15 UTC (adjust as needed)
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: lint-ratchet-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ratchet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Run lint-ratchet (composite action)
+        uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
+        with:
+          cursor_api_key: ${{ secrets.CURSOR_API_KEY }}
