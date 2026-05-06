@@ -15,10 +15,9 @@ concurrency:
   group: lint-ratchet-${{ github.repository }}
   cancel-in-progress: false
 
-# Required for creating branches + PRs via the default GITHUB_TOKEN.
-# To allow the agent to push .github/workflows/ files, also supply a PAT with
-# `workflow` scope via the `github_token` input or a GH_TOKEN repository secret.
+# Set permissions on GITHUB_TOKEN to allow updates to GitHub Actions workflows
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 

@@ -18,7 +18,9 @@ concurrency:
   group: lint-ratchet-${{ github.repository }}
   cancel-in-progress: false
 
+# Set permissions on GITHUB_TOKEN to allow updates to GitHub Actions workflows
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
