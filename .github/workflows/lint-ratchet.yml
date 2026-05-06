@@ -1,5 +1,11 @@
 # This repo's own scheduled workflow.
 # End users should copy `workflows/lint-ratchet.yml` into their own repo as-is.
+#
+# Setup required before this workflow can open PRs:
+# Repository → Settings → Actions → General → Workflow permissions
+#   • "Read and write permissions"
+#   • "Allow GitHub Actions to create and approve pull requests"
+# See: https://github.com/jfeldstein/agentic-lint-ratchet#required-allow-github-actions-to-create-pull-requests
 
 name: Lint ratchet (Cursor, scheduled)
 

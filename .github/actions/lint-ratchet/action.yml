@@ -1,3 +1,11 @@
+# Composite action — called by the scheduled workflow.
+# The calling workflow must have:
+#   permissions: { actions: write, contents: write, pull-requests: write }
+# and the repository must allow Actions to create PRs:
+#   Settings → Actions → General → Workflow permissions
+#   → "Allow GitHub Actions to create and approve pull requests"
+# See: https://github.com/jfeldstein/agentic-lint-ratchet#required-allow-github-actions-to-create-pull-requests
+
 name: Lint Ratchet (Cursor)
 description: Run the lint-ratchet Cursor agent against a checked-out repository
 
