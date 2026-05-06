@@ -2,3 +2,4 @@ charts/*.tgz
 .DS_Store
 node_modules/
 wt/
+pbcopy

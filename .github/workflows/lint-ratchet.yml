@@ -13,10 +13,6 @@ on:
         description: "Cursor API key (overrides CURSOR_API_KEY secret)"
         required: false
         type: string
-      github_token:
-        description: "PAT with repo+workflow scope (required to push .github/workflows/ files; overrides GH_TOKEN secret)"
-        required: false
-        type: string
 
 concurrency:
   group: lint-ratchet-${{ github.repository }}
@@ -35,4 +31,3 @@ jobs:
         uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
-          github_token: ${{ inputs.github_token || secrets.GH_TOKEN || github.token }}

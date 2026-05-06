@@ -5,14 +5,6 @@ inputs:
   cursor_api_key:
     description: Cursor API key (user or service account)
     required: true
-  github_token:
-    description: >
-      GitHub token passed to the agent as GH_TOKEN and GITHUB_TOKEN.
-      Defaults to github.token (the built-in workflow token), which cannot push
-      .github/workflows/ files. Supply a PAT with repo+workflow scope to allow
-      the agent to create or update CI workflow files.
-    required: false
-    default: ${{ github.token }}
   action_repository:
     description: Repository that contains the lint-ratchet runner code
     required: false
@@ -86,7 +78,7 @@ runs:
       shell: bash
       working-directory: target
       env:
-        GH_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         set -euo pipefail
 
@@ -123,8 +115,8 @@ runs:
       if: ${{ steps.preflight.outputs.should_run == 'true' }}
       env:
         CURSOR_API_KEY: ${{ inputs.cursor_api_key }}
-        GH_TOKEN: ${{ inputs.github_token }}
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ github.token }}
         GITHUB_WORKSPACE: ${{ github.workspace }}/target
         LINT_RATCHET_CONFIG_PATH: ${{ env.LINT_RATCHET_CONFIG_PATH }}
         LINT_RATCHET_SIGNATURE: ${{ env.LINT_RATCHET_SIGNATURE }}
