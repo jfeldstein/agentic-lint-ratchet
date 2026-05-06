@@ -2,8 +2,9 @@ import js from "@eslint/js";
 import globals from "globals";
 
 // Active coverage: scripts/**/*.mjs, eslint.config.js (flat config; same rules).
+// YAML under .github/: yamllint (.yamllint), invoked via npm test pretest (lint:yaml).
 // Path map (depth-first): below are not in files[] until they gain linted JS —
-//   .github/, actions/, config/, docs/, templates/, test/, workflows/,
+//   actions/, config/, docs/, templates/, test/, workflows/,
 //   Chart.yaml, Chart.lock, values.yaml, PROMPT.md, README.md (non-JS assets).
 export default [
   {

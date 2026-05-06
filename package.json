@@ -7,6 +7,8 @@
   "scripts": {
     "ratchet": "node scripts/run-ratchet.mjs",
     "lint:js": "eslint scripts/**/*.mjs eslint.config.js",
+    "lint:yaml": "pip install -q yamllint==1.35.1 && yamllint .github",
+    "pretest": "npm run lint:yaml",
     "test": "bats --recursive test"
   },
   "repository": {

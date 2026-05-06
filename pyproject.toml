@@ -7,8 +7,8 @@ readme = "README.md"
 [tool.ruff]
 target-version = "py311"
 src = ["scripts"]
-# Active coverage: scripts/ (see CI). Repo-wide `ruff check` uses Ruff defaults;
-# non-Python areas listed in eslint.config.js are prose/YAML/Helm (separate tooling).
+# Active coverage: scripts/ (see CI). YAML under .github/: yamllint via npm run lint:yaml / npm test.
+# Other prose/YAML/Helm paths remain deferred per CI scope comments / eslint.config.js map.
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP"]
