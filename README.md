@@ -25,7 +25,18 @@ End users only need to copy the workflow file (it references this repo’s compo
 
 - `workflows/lint-ratchet.yml` → `.github/workflows/lint-ratchet.yml`
 
-Then add the secret **`CURSOR_API_KEY`** in GitHub (Repository → Settings → Secrets → Actions).
+Then complete the one-time repository setup below.
+
+#### Required: allow GitHub Actions to create pull requests
+
+The workflow uses the built-in `GITHUB_TOKEN` to push branches and open PRs. GitHub disables this by default.
+
+**Repository → Settings → Actions → General → Workflow permissions**
+
+- Select **"Read and write permissions"**
+- Check **"Allow GitHub Actions to create and approve pull requests"**
+
+Then add the secret **`CURSOR_API_KEY`** in **Repository → Settings → Secrets → Actions**.
 
 If you prefer vendoring the composite action (pinning by file copy instead of `@main`), copy `actions/lint-ratchet.yml` into `.github/actions/lint-ratchet/action.yml` and update your workflow’s `uses:` to point at `./.github/actions/lint-ratchet`.
 
