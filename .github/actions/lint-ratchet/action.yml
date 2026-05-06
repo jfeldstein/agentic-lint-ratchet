@@ -31,7 +31,7 @@ inputs:
   prompt_file:
     description: Prompt markdown file path (relative to the runner checkout)
     required: false
-    default: PROMPT.md
+    default: skills/lint-ratchet/resources/RATCHET.md
   cursor_model:
     description: Cursor model id
     required: false
