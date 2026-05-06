@@ -7,17 +7,8 @@ readme = "README.md"
 [tool.ruff]
 target-version = "py311"
 src = ["scripts"]
-# Active coverage: scripts/ (see CI). Same depth-first deferrals as eslint.config.js —
-# explicit so repo-wide `ruff check` matches the ratchet map.
-extend-exclude = [
-    ".github",
-    "actions",
-    "config",
-    "docs",
-    "templates",
-    "test",
-    "workflows",
-]
+# Active coverage: scripts/ (see CI). Repo-wide `ruff check` uses Ruff defaults;
+# non-Python areas listed in eslint.config.js are prose/YAML/Helm (separate tooling).
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP"]
@@ -25,6 +16,3 @@ select = ["E", "F", "W", "I", "UP"]
 [tool.ruff.format]
 quote-style = "double"
 
-# Ratchet queue (non-Python / outside scripts/) — enable when Ruff gains relevance:
-# - Helm/YAML at repo root: Chart.yaml, Chart.lock, values.yaml (YAML plugins / separate tooling)
-# - Markdown: PROMPT.md, README.md

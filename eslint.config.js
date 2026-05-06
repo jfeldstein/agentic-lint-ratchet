@@ -1,37 +1,16 @@
 import js from "@eslint/js";
 import globals from "globals";
 
-// Active coverage: all *.mjs under scripts/ (recursive).
-//
-// Depth-first ratchet queue — explicit deferrals (ignored until JS lint applies here):
-// 1. .github/
-// 2. actions/
-// 3. config/
-// 4. docs/
-// 5. templates/
-// 6. test/
-// 7. workflows/
-// 8. Root Helm + prose: Chart.yaml, Chart.lock, values.yaml, PROMPT.md, README.md
+// Active coverage: scripts/**/*.mjs, eslint.config.js (flat config; same rules).
+// Path map (depth-first): below are not in files[] until they gain linted JS —
+//   .github/, actions/, config/, docs/, templates/, test/, workflows/,
+//   Chart.yaml, Chart.lock, values.yaml, PROMPT.md, README.md (non-JS assets).
 export default [
   {
-    ignores: [
-      "**/node_modules/**",
-      ".github/**",
-      "actions/**",
-      "config/**",
-      "docs/**",
-      "templates/**",
-      "test/**",
-      "workflows/**",
-      "Chart.yaml",
-      "Chart.lock",
-      "values.yaml",
-      "PROMPT.md",
-      "README.md",
-    ],
+    ignores: ["**/node_modules/**"],
   },
   {
-    files: ["scripts/**/*.mjs"],
+    files: ["scripts/**/*.mjs", "eslint.config.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
