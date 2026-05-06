@@ -1,66 +1,47 @@
 # agentic-lint-ratchet
 
-**Goal:** an **in-cluster bot** that **independently ratchets** linters on a **configured GitHub repo** (schedule, checkout, `gh`, CI babysitting on the cluster—not on a laptop). What that requires versus what this chart ships today is spelled out in **[docs/in-cluster-bot.md](docs/in-cluster-bot.md)**.
+This repository ships **three ways** to run lint ratcheting against a GitHub repo: a **composable GitHub Action** (scheduled PR bot), a **Helm chart** that wraps [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) for in-cluster deployment, and a **Cursor skill** you can install locally. The chart’s HTTP `CronJob` today only **wakes** the agent process; a fully autonomous in-cluster ratchet (checkout, `gh`, CI babysitting on the cluster) is **documented as a product gap** in [docs/in-cluster-bot.md](docs/in-cluster-bot.md).
 
-This repo is a **Helm application chart** that vendors [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) the same way as the upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world) example: `templates/agent.yaml` includes `declarative-agent.system`, tunables under `**agent:`** in `values.yaml`.
+---
 
-The hosted agent reads **`skills/lint-ratchet/resources/RATCHET.md`** via Helm **`agent.systemPromptFile`** (see [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) — exactly one of inline `systemPrompt` or `systemPromptFile`). Edit that file in git; do not inline the prompt in `values.yaml`.
+## If you operate the repo (humans)
 
-To resync **`lintRatchet.skillVersion`** with `skills/lint-ratchet/package.json` after a skill semver bump:
+**Fastest path — GitHub Actions**
 
-```bash
-python3 scripts/sync_skill_version_to_values.py
-```
+1. Copy [workflows/lint-ratchet.yml](workflows/lint-ratchet.yml) to `.github/workflows/lint-ratchet.yml` in the **target** repository (this repo keeps an equivalent under [.github/workflows/lint-ratchet.yml](.github/workflows/lint-ratchet.yml) for itself).
+2. In **Repository → Settings → Actions → General → Workflow permissions**: enable **Read and write permissions** and **Allow GitHub Actions to create and approve pull requests**.
+3. Add repository secret **`CURSOR_API_KEY`** under **Settings → Secrets → Actions**.
 
-**Cursor skills CLI (optional):** install a **tagged** copy of this repo’s skill into Cursor’s skill dirs with a git ref fragment, e.g. `npx skills add jfeldstein/agentic-lint-ratchet#lint-ratchet-skill-v1.0.0 -a cursor -y` (the `#ref` is passed to `git clone --branch`). Or use a tree URL: `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. The composite action’s ratchet runner does **not** require `npx skills add` — it reads `RATCHET_PROMPT_FILE` from the checked-out repo at `action_ref`.
+To vendor the composite action instead of referencing this repo by ref, copy [actions/lint-ratchet.yml](actions/lint-ratchet.yml) to `.github/actions/lint-ratchet/action.yml` and point the workflow `uses:` at `./.github/actions/lint-ratchet`.
 
-The lint-ratchet config contract is illustrated in **[config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml)**. Copy it to **`.lint-ratchet.config.yml`** at the root of your target repository. Override the path via the `LINT_RATCHET_CONFIG_PATH` env var or the `config_path` action input.
+**Config in the target repo:** mirror [config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml) to `.lint-ratchet.config.yml` at the repo root, or set **`LINT_RATCHET_CONFIG_PATH`** / the action’s `config_path` input to another path.
 
-## GitHub Actions (cron PR bot)
+---
 
-This repo includes **copy-paste templates** for running lint-ratchet on a schedule in GitHub Actions.
+## If you integrate or extend this repo (agents and tools)
 
-- **`workflows/`**: “this repo using its own composable action” — a ready-to-copy scheduled workflow that references the composable action by full `owner/repo/path@ref`.
-- **`actions/`**: the **composable action** template (what the workflow runs).
+| Concern | Location |
+| -------- | -------- |
+| Ratchet instructions read by the deployed agent | [skills/lint-ratchet/resources/RATCHET.md](skills/lint-ratchet/resources/RATCHET.md) — wired via Helm **`agent.systemPromptFile`**; edit in git, not inline in `values.yaml` (library chart allows exactly one of `systemPrompt` or `systemPromptFile`). |
+| Helm values for the agent | `values.yaml` — tunables under **`agent:`**; `templates/agent.yaml` includes `declarative-agent.system` (same pattern as upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world)). |
+| Composite action runtime | Uses env **`RATCHET_PROMPT_FILE`** from the checked-out repo at **`action_ref`**; does **not** depend on `npx skills add`. |
+| Skill version ↔ Helm | After bumping **`skills/lint-ratchet/package.json`**, run **`python3 scripts/sync_skill_version_to_values.py`** so **`lintRatchet.skillVersion`** stays aligned. |
+| Optional Cursor install | `npx skills add jfeldstein/agentic-lint-ratchet#<git-ref> -a cursor -y` or a tree URL like `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. |
 
-### End-user install (copy into your repo)
+---
 
-End users only need to copy the workflow file (it references this repo’s composite action directly):
+## Helm (cluster)
 
-- `workflows/lint-ratchet.yml` → `.github/workflows/lint-ratchet.yml`
-
-Then complete the one-time repository setup below.
-
-#### Required: allow GitHub Actions to create pull requests
-
-The workflow uses the built-in `GITHUB_TOKEN` to push branches and open PRs. GitHub disables this by default.
-
-**Repository → Settings → Actions → General → Workflow permissions**
-
-- Select **"Read and write permissions"**
-- Check **"Allow GitHub Actions to create and approve pull requests"**
-
-Then add the secret **`CURSOR_API_KEY`** in **Repository → Settings → Secrets → Actions**.
-
-If you prefer vendoring the composite action (pinning by file copy instead of `@main`), copy `actions/lint-ratchet.yml` into `.github/actions/lint-ratchet/action.yml` and update your workflow’s `uses:` to point at `./.github/actions/lint-ratchet`.
-
-## Dependency path
-
-`Chart.yaml` resolves the library chart from `**file://../declarative-agent-library-chart/helm/chart`**. Clone [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) next to this repo, or change that URL.
+**Dependency:** [Chart.yaml](Chart.yaml) resolves the library chart from `file://../declarative-agent-library-chart/helm/chart`. Clone [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) beside this repo or change the URL, then:
 
 ```bash
 helm dependency build --skip-refresh
 ```
 
-## Hourly CronJob (HTTP wake)
-
-When `**triggerCron.enabled**` is true (default), a `**CronJob**` calls `**POST /api/v1/trigger**` on the agent Service. That **does not** by itself clone a repo or open PRs; see **docs/in-cluster-bot.md**. Disable or retune via `**triggerCron`** in `values.yaml`.
-
-## Install (outline)
-
-Build or load the runtime image expected by `**agent.image**` (see the library chart README), then:
+Build or supply the image referenced by **`agent.image`** (see the library chart README), then install:
 
 ```bash
 helm upgrade --install lint-ratchet . -n <namespace> --wait -f values.yaml
 ```
 
+When **`triggerCron.enabled`** is true (default), a **CronJob** sends **`POST /api/v1/trigger`** to the agent Service. That wake **does not** clone a repo or open PRs by itself; behavior limits and the path to a real worker are in [docs/in-cluster-bot.md](docs/in-cluster-bot.md). Tune or disable via **`triggerCron`** in `values.yaml`.
