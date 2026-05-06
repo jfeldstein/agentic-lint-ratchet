@@ -1,0 +1,24 @@
+# Opens release PRs from conventional commits; on merge, creates GitHub Releases and git tags (e.g. v1.2.3).
+# Uses GITHUB_TOKEN (release PRs/tags do not re-trigger workflows).
+# For CI on release PRs, add a PAT secret and pass it via `token:` instead.
+
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

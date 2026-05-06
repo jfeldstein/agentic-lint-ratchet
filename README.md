@@ -4,11 +4,15 @@
 
 This repo is a **Helm application chart** that vendors [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) the same way as the upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world) example: `templates/agent.yaml` includes `declarative-agent.system`, tunables under `**agent:`** in `values.yaml`.
 
-The `**systemPrompt**` is **[PROMPT.md](PROMPT.md)** (from `agentic-pocs/projects/lint-ratchet`). After editing `PROMPT.md`, run:
+The hosted agent reads **`skills/lint-ratchet/resources/RATCHET.md`** via Helm **`agent.systemPromptFile`** (see [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) — exactly one of inline `systemPrompt` or `systemPromptFile`). Edit that file in git; do not inline the prompt in `values.yaml`.
+
+To resync **`lintRatchet.skillVersion`** with `skills/lint-ratchet/package.json` after a skill semver bump:
 
 ```bash
-python3 scripts/sync_prompt_to_values.py
+python3 scripts/sync_skill_version_to_values.py
 ```
+
+**Cursor skills CLI (optional):** install a **tagged** copy of this repo’s skill into Cursor’s skill dirs with a git ref fragment, e.g. `npx skills add jfeldstein/agentic-lint-ratchet#lint-ratchet-skill-v1.0.0 -a cursor -y` (the `#ref` is passed to `git clone --branch`). Or use a tree URL: `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. The composite action’s ratchet runner does **not** require `npx skills add` — it reads `RATCHET_PROMPT_FILE` from the checked-out repo at `action_ref`.
 
 The lint-ratchet config contract is illustrated in **[config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml)**. Copy it to **`.lint-ratchet.config.yml`** at the root of your target repository. Override the path via the `LINT_RATCHET_CONFIG_PATH` env var or the `config_path` action input.
 

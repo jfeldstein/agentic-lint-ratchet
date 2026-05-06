@@ -13,14 +13,23 @@ inputs:
   cursor_api_key:
     description: Cursor API key (user or service account)
     required: true
+  skill_version:
+    description: >
+      Semver of the skills/lint-ratchet artifact expected by this action release (must match
+      skills/lint-ratchet/package.json at the same git ref). Documentation only unless you add checks.
+    required: false
+    default: "1.0.0"
   action_repository:
     description: Repository that contains the lint-ratchet runner code
     required: false
     default: jfeldstein/agentic-lint-ratchet
   action_ref:
-    description: Ref (branch/tag/SHA) for the lint-ratchet runner checkout
+    description: >
+      Git ref for the runner checkout (must match the tag on uses: when pinning). Defaults to
+      github.action_ref when unset so uses org/repo/.github/actions/lint-ratchet@vX pins code at vX,
+      not main.
     required: false
-    default: main
+    default: ""
   config_path:
     description: >
       Path to the lint-ratchet config file (relative to target repo root).
@@ -58,7 +67,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
+        ref: ${{ inputs.action_ref || github.action_ref || 'main' }}
         fetch-depth: 1
         path: lint-ratchet
 

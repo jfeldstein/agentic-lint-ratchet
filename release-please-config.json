@@ -1,0 +1,57 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "plugins": [
+    {
+      "type": "linked-versions",
+      "groupName": "lint-ratchet",
+      "components": [
+        "lint-ratchet-skill",
+        "lint-ratchet-chart",
+        "lint-ratchet-action"
+      ]
+    }
+  ],
+  "packages": {
+    "skills/lint-ratchet": {
+      "release-type": "node",
+      "component": "lint-ratchet-skill",
+      "changelog-path": "skills/lint-ratchet/CHANGELOG.md",
+      "include-component-in-tag": true,
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "skills/lint-ratchet/SKILL.md"
+        },
+        {
+          "type": "yaml",
+          "path": "values.yaml",
+          "jsonpath": "$.lintRatchet.skillVersion"
+        },
+        {
+          "type": "yaml",
+          "path": ".github/actions/lint-ratchet/action.yml",
+          "jsonpath": "$.inputs.skill_version.default"
+        },
+        {
+          "type": "yaml",
+          "path": "actions/lint-ratchet.yml",
+          "jsonpath": "$.inputs.skill_version.default"
+        }
+      ]
+    },
+    ".": {
+      "release-type": "helm",
+      "component": "lint-ratchet-chart",
+      "changelog-path": "CHANGELOG-chart.md",
+      "include-component-in-tag": true,
+      "exclude-paths": ["skills", ".github", "actions"]
+    },
+    ".github/actions/lint-ratchet": {
+      "release-type": "simple",
+      "component": "lint-ratchet-action",
+      "version-file": ".github/actions/lint-ratchet/version.txt",
+      "changelog-path": ".github/actions/lint-ratchet/CHANGELOG.md",
+      "include-component-in-tag": true
+    }
+  }
+}
