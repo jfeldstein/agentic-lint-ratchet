@@ -18,7 +18,7 @@
 
 ### Bug Fixes
 
-* **runner:** log full CursorAgentError details on startup failure ([5c9eda3](https://github.com/jfeldstein/agentic-lint-ratchet/commit/5c9eda3e4fd2da5bfe722a62927c5432d96284ec))
+* **runner:** log full runtime error details on startup failure ([5c9eda3](https://github.com/jfeldstein/agentic-lint-ratchet/commit/5c9eda3e4fd2da5bfe722a62927c5432d96284ec))
 * **runner:** stream agent output and mask API key in logs ([fad6e6f](https://github.com/jfeldstein/agentic-lint-ratchet/commit/fad6e6fe126b674d9c729bae26536930de3591fd))
 
 

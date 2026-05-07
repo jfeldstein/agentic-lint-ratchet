@@ -2,5 +2,5 @@
   "name": "lint-ratchet-skill",
   "version": "1.2.0",
   "private": true,
-  "description": "Cursor skill (lint-ratchet). Release tag drives pins in Helm values and the composite GitHub Action."
+  "description": "Lint-ratchet skill. Release tag drives pins in Helm values and the composite GitHub Action."
 }

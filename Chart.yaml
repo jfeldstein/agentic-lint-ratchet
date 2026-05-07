@@ -2,7 +2,7 @@ apiVersion: v2
 name: agentic-lint-ratchet
 description: Lint-Ratchet hosted agent (Declarative Agent Library application chart)
 type: application
-version: 1.2.0
+version: 1.1.0
 dependencies:
   - name: declarative-agent-library-chart
     version: 0.1.0

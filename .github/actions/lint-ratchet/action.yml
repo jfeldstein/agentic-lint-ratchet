@@ -15,9 +15,13 @@ name: Lint Ratchet
 description: Run the lint-ratchet agent against a checked-out repository
 
 inputs:
+  agent:
+    description: Agent runtime to use (cursor or pi)
+    required: false
+    default: cursor
   cursor_api_key:
     description: Cursor runtime API key (user or service account)
-    required: true
+    required: false
   skill_version:
     description: >
       Semver of the skills/lint-ratchet artifact expected by this action release (must match
@@ -135,6 +139,7 @@ runs:
       working-directory: lint-ratchet
       if: ${{ steps.preflight.outputs.should_run == 'true' }}
       env:
+        RATCHET_AGENT: ${{ inputs.agent }}
         CURSOR_API_KEY: ${{ inputs.cursor_api_key }}
         GH_TOKEN: ${{ github.token }}
         GITHUB_TOKEN: ${{ github.token }}
