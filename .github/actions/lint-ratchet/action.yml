@@ -11,19 +11,23 @@
 #   → "Allow GitHub Actions to create and approve pull requests"
 # See: https://github.com/jfeldstein/agentic-lint-ratchet#required-allow-github-actions-to-create-pull-requests
 
-name: Lint Ratchet (Cursor)
-description: Run the lint-ratchet Cursor agent against a checked-out repository
+name: Lint Ratchet
+description: Run the lint-ratchet agent against a checked-out repository
 
 inputs:
+  agent:
+    description: Agent runtime to use (cursor or pi)
+    required: false
+    default: cursor
   cursor_api_key:
     description: Cursor API key (user or service account)
-    required: true
+    required: false
   skill_version:
     description: >
       Semver of the skills/lint-ratchet artifact expected by this action release (must match
       skills/lint-ratchet/package.json at the same git ref). Documentation only unless you add checks.
     required: false
-    default: "1.0.0"
+    default: "1.1.0"
   action_repository:
     description: Repository that contains the lint-ratchet runner code
     required: false
@@ -58,6 +62,7 @@ runs:
   using: composite
   steps:
     - name: Mask API key
+      if: ${{ inputs.cursor_api_key != '' }}
       shell: bash
       run: echo "::add-mask::${{ inputs.cursor_api_key }}"
 
@@ -135,6 +140,7 @@ runs:
       working-directory: lint-ratchet
       if: ${{ steps.preflight.outputs.should_run == 'true' }}
       env:
+        RATCHET_AGENT: ${{ inputs.agent }}
         CURSOR_API_KEY: ${{ inputs.cursor_api_key }}
         GH_TOKEN: ${{ github.token }}
         GITHUB_TOKEN: ${{ github.token }}
@@ -143,4 +149,7 @@ runs:
         LINT_RATCHET_SIGNATURE: ${{ env.LINT_RATCHET_SIGNATURE }}
         RATCHET_PROMPT_FILE: ${{ github.workspace }}/lint-ratchet/${{ inputs.prompt_file }}
         CURSOR_MODEL: ${{ inputs.cursor_model }}
+        LITELLM_BASE_URL: ${{ env.LITELLM_BASE_URL }}
+        LITELLM_API_KEY: ${{ env.LITELLM_API_KEY }}
+        PI_MODEL: ${{ env.PI_MODEL }}
       run: npm run ratchet

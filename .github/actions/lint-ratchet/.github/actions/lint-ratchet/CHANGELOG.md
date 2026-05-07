@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/jfeldstein/agentic-lint-ratchet/compare/lint-ratchet-action-v1.1.0...lint-ratchet-action-v1.2.0) (2026-05-07)
+
+
+### Features
+
+* **runtime:** add selectable cursor/pi harness execution ([241bde6](https://github.com/jfeldstein/agentic-lint-ratchet/commit/241bde62d77d237e6101c21a2d69cc5bef93c4f9))
+
 ## [1.1.0](https://github.com/jfeldstein/agentic-lint-ratchet/compare/lint-ratchet-action-v1.0.0...lint-ratchet-action-v1.1.0) (2026-05-06)
 
 

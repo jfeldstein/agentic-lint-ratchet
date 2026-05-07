@@ -11,8 +11,11 @@ This repository ships **three ways** to run lint ratcheting against a GitHub rep
 1. Copy [workflows/lint-ratchet.yml](workflows/lint-ratchet.yml) to `.github/workflows/lint-ratchet.yml` in the **target** repository (this repo keeps an equivalent under [.github/workflows/lint-ratchet.yml](.github/workflows/lint-ratchet.yml) for itself).
 2. In **Repository → Settings → Actions → General → Workflow permissions**: enable **Read and write permissions** and **Allow GitHub Actions to create and approve pull requests**.
 3. Add repository secret **`CURSOR_API_KEY`** under **Settings → Secrets → Actions**.
+4. Choose runtime in workflow `with.agent`:
+   - `agent: cursor` (default) requires `CURSOR_API_KEY` and optionally `cursor_model`.
+   - `agent: pi` requires job/step `env:` entries for `LITELLM_BASE_URL`, `LITELLM_API_KEY`, and `PI_MODEL`.
 
-To vendor the composite action instead of referencing this repo by ref, copy [actions/lint-ratchet.yml](actions/lint-ratchet.yml) to `.github/actions/lint-ratchet/action.yml` and point the workflow `uses:` at `./.github/actions/lint-ratchet`.
+To vendor the composite action instead of referencing this repo by ref, copy [`actions/lint-ratchet.yml`](actions/lint-ratchet.yml) to `.github/actions/lint-ratchet/action.yml` in the target repo and point the workflow `uses:` at `./.github/actions/lint-ratchet`.
 
 **Config in the target repo:** mirror [config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml) to `.lint-ratchet.config.yml` at the repo root, or set **`LINT_RATCHET_CONFIG_PATH`** / the action’s `config_path` input to another path.
 
@@ -25,6 +28,7 @@ To vendor the composite action instead of referencing this repo by ref, copy [ac
 | Ratchet instructions read by the deployed agent | [skills/lint-ratchet/resources/RATCHET.md](skills/lint-ratchet/resources/RATCHET.md) — wired via Helm **`agent.systemPromptFile`**; edit in git, not inline in `values.yaml` (library chart allows exactly one of `systemPrompt` or `systemPromptFile`). |
 | Helm values for the agent | `values.yaml` — tunables under **`agent:`**; `templates/agent.yaml` includes `declarative-agent.system` (same pattern as upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world)). |
 | Composite action runtime | Uses env **`RATCHET_PROMPT_FILE`** from the checked-out repo at **`action_ref`**; does **not** depend on `npx skills add`. |
+| Supported agent runtimes | `cursor` and `pi` are implemented. `claude` and `opencode` are currently unsupported and fail fast with an explicit error. |
 | Skill version ↔ Helm | After bumping **`skills/lint-ratchet/package.json`**, run **`python3 scripts/sync_skill_version_to_values.py`** so **`lintRatchet.skillVersion`** stays aligned. |
 | Optional Cursor install | `npx skills add jfeldstein/agentic-lint-ratchet#<git-ref> -a cursor -y` or a tree URL like `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. |
 

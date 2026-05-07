@@ -56,9 +56,15 @@ jobs:
 
           echo "OK: checks/statuses readable"
       - name: Run lint-ratchet (composite action)
-        uses: ./.github/actions/lint-ratchet
+        uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@lint-ratchet-action-v1.1.0
         if: ${{ inputs.cursor_api_key != '' || env.CURSOR_API_KEY != '' }}
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          # Required when agent: pi
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          PI_MODEL: ${{ vars.PI_MODEL }}
         with:
+          # Set to "cursor" or "pi"
+          agent: cursor
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
