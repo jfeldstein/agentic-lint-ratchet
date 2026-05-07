@@ -29,6 +29,8 @@ permissions:
   actions: write
   contents: write
   pull-requests: write
+  checks: read
+  statuses: read
 
 jobs:
   ratchet:
