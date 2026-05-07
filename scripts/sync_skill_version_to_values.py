@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep lintRatchet.skillVersion in values.yaml aligned with skills/lint-ratchet/package.json."""
+"""Align values.yaml lintRatchet.skillVersion with skills/lint-ratchet/package.json."""
 
 from __future__ import annotations
 
@@ -24,7 +24,8 @@ def main() -> None:
     )
     if n != 1:
         raise SystemExit(
-            f"expected exactly one lintRatchet.skillVersion block in {VALUES}, replaced {n}"
+            "expected exactly one lintRatchet.skillVersion block in "
+            f"{VALUES}, replaced {n}"
         )
     VALUES.write_text(updated, encoding="utf-8")
 

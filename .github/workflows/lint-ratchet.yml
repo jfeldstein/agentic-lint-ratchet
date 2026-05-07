@@ -7,7 +7,7 @@
 #   • "Allow GitHub Actions to create and approve pull requests"
 # See: https://github.com/jfeldstein/agentic-lint-ratchet#required-allow-github-actions-to-create-pull-requests
 
-name: Lint ratchet (scheduled)
+name: Lint ratchet (Cursor, scheduled)
 
 on:
   schedule:
@@ -29,15 +29,37 @@ permissions:
   actions: write
   contents: write
   pull-requests: write
+  checks: read
+  statuses: read
 
 jobs:
   ratchet:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
+      - name: Checkout repository (for local action)
+        uses: actions/checkout@v4
+      - name: Sanity check GITHUB_TOKEN can read checks/statuses
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo="${GITHUB_REPOSITORY}"
+          sha="${GITHUB_SHA}"
+
+          echo "Repo: $repo"
+          echo "SHA: $sha"
+
+          gh api -H "Accept: application/vnd.github+json" "/repos/$repo/commits/$sha/status" >/dev/null
+          gh api -H "Accept: application/vnd.github+json" "/repos/$repo/commits/$sha/check-runs" >/dev/null
+
+          echo "OK: checks/statuses readable"
       - name: Run lint-ratchet (composite action)
         uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@lint-ratchet-action-v1.1.0
+        if: ${{ inputs.cursor_api_key != '' || env.CURSOR_API_KEY != '' }}
         env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           # Required when agent: pi
           LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
           LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
