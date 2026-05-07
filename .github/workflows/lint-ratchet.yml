@@ -7,7 +7,7 @@
 #   • "Allow GitHub Actions to create and approve pull requests"
 # See: https://github.com/jfeldstein/agentic-lint-ratchet#required-allow-github-actions-to-create-pull-requests
 
-name: Lint ratchet (Cursor, scheduled)
+name: Lint ratchet (scheduled)
 
 on:
   schedule:
@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       cursor_api_key:
-        description: "Cursor API key (overrides CURSOR_API_KEY secret)"
+        description: "Cursor runtime API key (overrides CURSOR_API_KEY secret)"
         required: false
         type: string
 
