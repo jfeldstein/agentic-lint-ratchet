@@ -57,6 +57,8 @@ jobs:
           echo "OK: checks/statuses readable"
       - name: Run lint-ratchet (composite action)
         uses: ./.github/actions/lint-ratchet
-        if: ${{ inputs.cursor_api_key != '' || secrets.CURSOR_API_KEY != '' }}
+        if: ${{ inputs.cursor_api_key != '' || env.CURSOR_API_KEY != '' }}
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
