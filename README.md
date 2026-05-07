@@ -29,7 +29,6 @@ To vendor the composite action instead of referencing this repo by ref, copy [`a
 | Helm values for the agent | `values.yaml` — tunables under **`agent:`**; `templates/agent.yaml` includes `declarative-agent.system` (same pattern as upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world)). |
 | Composite action runtime | Uses env **`RATCHET_PROMPT_FILE`** from the checked-out repo at **`action_ref`**; does **not** depend on `npx skills add`. |
 | Supported agent runtimes | `cursor` and `pi` are implemented. `claude` and `opencode` are currently unsupported and fail fast with an explicit error. |
-| Skill version ↔ Helm | After bumping **`skills/lint-ratchet/package.json`**, run **`python3 scripts/sync_skill_version_to_values.py`** so **`lintRatchet.skillVersion`** stays aligned. |
 | Optional Cursor install | `npx skills add jfeldstein/agentic-lint-ratchet#<git-ref> -a cursor -y` or a tree URL like `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. |
 
 ---
