@@ -7,7 +7,7 @@
   "scripts": {
     "ratchet": "node scripts/run-ratchet.mjs",
     "lint:js": "eslint scripts/**/*.mjs eslint.config.js",
-    "lint:yaml": "python3 -c \"import yamllint\" 2>/dev/null || python3 -m pip install -q yamllint==1.35.1; python3 -m yamllint .github",
+    "lint:yaml": "python3 -c \"import yamllint\" 2>/dev/null || python3 -m pip install -q yamllint==1.35.1; python3 -m yamllint .github .lint-ratchet.config.yml config workflows Chart.yaml actions values.yaml",
     "pretest": "npm run lint:yaml",
     "test": "bats --recursive test"
   },

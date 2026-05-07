@@ -7,7 +7,7 @@ import { assertRequiredEnv } from "./env.mjs";
 const PI_CLI_PACKAGE = "@mariozechner/pi-coding-agent";
 const PI_PROVIDER_ID = "litellm";
 const PI_SETUP_HINT =
-  "Set LITELLM_BASE_URL, LITELLM_API_KEY, and PI_MODEL in workflow env: on the job or lint-ratchet step.";
+  "Consult the lint-ratchet workflow docs for Litellm and Pi vars; put unset entries under workflow env: on the job or lint-ratchet step.";
 
 function writePiModelsConfig(env) {
   const piDir = join(homedir(), ".pi", "agent");

@@ -1,9 +1,10 @@
 # Copy to `.github/workflows/ci.yml` (requires a token with **workflow** scope for git push).
 #
-# Lint scope map (mirrors eslint.config.js + pyproject.toml):
-# - Active: scripts/**/*.mjs (ESLint), scripts/**/*.py (Ruff).
-# - Deferred (depth-first queue): .github/, actions/, config/, docs/, templates/, test/, workflows/,
-#   Chart.yaml, Chart.lock, values.yaml, PROMPT.md, README.md (YAML / Helm / Markdown / Bats until tooling lands).
+# Lint scope map (mirrors .github/workflows/ci.yml in this repo):
+# - Active: scripts/*.mjs (ESLint), scripts/*.py (Ruff).
+# - Active (yamllint): .github/**/*.yml, repo .lint-ratchet.config.yml, config/, workflows/, Chart.yaml,
+#   actions/*.yml, values.yaml (see package.json lint:yaml).
+# - Deferred: Helm templates/ (Go templates), Markdown, Bats/shell — see checked-in workflow.
 
 name: CI
 

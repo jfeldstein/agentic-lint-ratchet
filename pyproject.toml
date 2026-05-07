@@ -7,8 +7,8 @@ readme = "README.md"
 [tool.ruff]
 target-version = "py311"
 src = ["scripts"]
-# Active coverage: scripts/ (see CI). YAML under .github/: yamllint via npm run lint:yaml / npm test.
-# Other prose/YAML/Helm paths remain deferred per CI scope comments / eslint.config.js map.
+# Active coverage: scripts/ (see CI). YAML: yamllint via npm run lint:yaml — .github/, root
+# config, config/, workflows/, Chart.yaml, actions/, values.yaml (not templates/ — Helm templating).
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP"]
