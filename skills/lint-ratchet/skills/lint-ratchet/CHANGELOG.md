@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/jfeldstein/agentic-lint-ratchet/compare/lint-ratchet-skill-v1.1.0...lint-ratchet-skill-v1.2.0) (2026-05-07)
+
+
+### Miscellaneous Chores
+
+* **lint-ratchet-skill:** Synchronize lint-ratchet versions
+
 ## [1.1.0](https://github.com/jfeldstein/agentic-lint-ratchet/compare/lint-ratchet-skill-v1.0.0...lint-ratchet-skill-v1.1.0) (2026-05-06)
 
 
