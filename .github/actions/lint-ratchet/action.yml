@@ -1,6 +1,11 @@
 # Composite action — called by the scheduled workflow.
 # The calling workflow must have:
-#   permissions: { actions: write, contents: write, pull-requests: write }
+#   permissions:
+#     actions: write
+#     contents: write
+#     pull-requests: write
+#     checks: read
+#     statuses: read
 # and the repository must allow Actions to create PRs:
 #   Settings → Actions → General → Workflow permissions
 #   → "Allow GitHub Actions to create and approve pull requests"
@@ -25,11 +30,10 @@ inputs:
     default: jfeldstein/agentic-lint-ratchet
   action_ref:
     description: >
-      Git ref for the runner checkout (must match the tag on uses: when pinning). Defaults to
-      github.action_ref when unset so uses org/repo/.github/actions/lint-ratchet@vX pins code at vX,
-      not main.
+      Git ref for the runner checkout (set this when pinning the action to a tag/sha so the runner
+      checkout matches).
     required: false
-    default: ""
+    default: "main"
   config_path:
     description: >
       Path to the lint-ratchet config file (relative to target repo root).
@@ -67,7 +71,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref || github.action_ref || 'main' }}
+        ref: ${{ inputs.action_ref }}
         fetch-depth: 1
         path: lint-ratchet
 
