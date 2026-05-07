@@ -7,7 +7,7 @@
 #   • "Allow GitHub Actions to create and approve pull requests"
 # See: https://github.com/jfeldstein/agentic-lint-ratchet#required-allow-github-actions-to-create-pull-requests
 
-name: Lint ratchet (Cursor, scheduled)
+name: Lint ratchet (scheduled)
 
 on:
   schedule:
@@ -37,5 +37,12 @@ jobs:
     steps:
       - name: Run lint-ratchet (composite action)
         uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
+        env:
+          # Required when agent: pi
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          PI_MODEL: ${{ vars.PI_MODEL }}
         with:
+          # Set to "cursor" or "pi"
+          agent: cursor
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
