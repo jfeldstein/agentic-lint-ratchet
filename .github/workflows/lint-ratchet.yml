@@ -39,7 +39,24 @@ jobs:
     steps:
       - name: Checkout repository (for local action)
         uses: actions/checkout@v4
+      - name: Sanity check GITHUB_TOKEN can read checks/statuses
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo="${GITHUB_REPOSITORY}"
+          sha="${GITHUB_SHA}"
+
+          echo "Repo: $repo"
+          echo "SHA: $sha"
+
+          gh api -H "Accept: application/vnd.github+json" "/repos/$repo/commits/$sha/status" >/dev/null
+          gh api -H "Accept: application/vnd.github+json" "/repos/$repo/commits/$sha/check-runs" >/dev/null
+
+          echo "OK: checks/statuses readable"
       - name: Run lint-ratchet (composite action)
         uses: ./.github/actions/lint-ratchet
+        if: ${{ inputs.cursor_api_key != '' || secrets.CURSOR_API_KEY != '' }}
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
