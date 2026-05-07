@@ -20,7 +20,7 @@ inputs:
     required: false
     default: cursor
   cursor_api_key:
-    description: Cursor API key (user or service account)
+    description: Cursor runtime API key (user or service account)
     required: false
   skill_version:
     description: >
@@ -50,7 +50,7 @@ inputs:
     required: false
     default: skills/lint-ratchet/resources/RATCHET.md
   cursor_model:
-    description: Cursor model id
+    description: Cursor model id (cursor runtime only)
     required: false
     default: composer-2
   node_version:
