@@ -1,11 +1,12 @@
 # Hosted agent prompt: path into this chart package (DALC `systemPromptFile` → Helm `.Files.Get`).
-# Exactly one of systemPrompt (inline) or systemPromptFile may be non-empty — see declarative-agent-library-chart values schema.
+# Exactly one of systemPrompt (inline) or systemPromptFile may be non-empty — see
+# declarative-agent-library-chart values schema.
 #
 # lintRatchet.skillVersion mirrors skills/lint-ratchet/package.json for traceability / release-please pins.
 # Sync: python3 scripts/sync_skill_version_to_values.py
 
 lintRatchet:
-  skillVersion: "1.0.0"
+  skillVersion: "1.2.0"
 
 agent:
   systemPrompt: ""
