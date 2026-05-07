@@ -24,11 +24,6 @@
         },
         {
           "type": "yaml",
-          "path": "values.yaml",
-          "jsonpath": "$.lintRatchet.skillVersion"
-        },
-        {
-          "type": "yaml",
           "path": ".github/actions/lint-ratchet/action.yml",
           "jsonpath": "$.inputs.skill_version.default"
         },

@@ -1,6 +1,6 @@
 # agentic-lint-ratchet
 
-This repository ships **three ways** to run lint ratcheting against a GitHub repo: a **composable GitHub Action** (scheduled PR bot), a **Helm chart** that wraps [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) for in-cluster deployment, and a **local skill** you can install. The chart’s HTTP `CronJob` today only **wakes** the agent process; a fully autonomous in-cluster ratchet (checkout, `gh`, CI babysitting on the cluster) is **documented as a product gap** in [docs/in-cluster-bot.md](docs/in-cluster-bot.md).
+This repository ships **three ways** to run lint ratcheting against a GitHub repo: a **composable GitHub Action** (scheduled PR bot), a **Helm chart** that wraps [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) for in-cluster deployment, and a **local skill** you can install locally. The chart’s HTTP `CronJob` today only **wakes** the agent process; a fully autonomous in-cluster ratchet (checkout, `gh`, CI babysitting on the cluster) is **documented as a product gap** in [docs/in-cluster-bot.md](docs/in-cluster-bot.md).
 
 ---
 
@@ -29,7 +29,6 @@ To vendor the composite action instead of referencing this repo by ref, copy [`a
 | Helm values for the agent | `values.yaml` — tunables under **`agent:`**; `templates/agent.yaml` includes `declarative-agent.system` (same pattern as upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world)). |
 | Composite action runtime | Uses env **`RATCHET_PROMPT_FILE`** from the checked-out repo at **`action_ref`**; does **not** depend on `npx skills add`. |
 | Supported agent runtimes | `cursor` and `pi` are implemented. `claude` and `opencode` are currently unsupported and fail fast with an explicit error. |
-| Skill version ↔ Helm | After bumping **`skills/lint-ratchet/package.json`**, run **`python3 scripts/sync_skill_version_to_values.py`** so **`lintRatchet.skillVersion`** stays aligned. |
 | Optional local install | `npx skills add jfeldstein/agentic-lint-ratchet#<git-ref> -a cursor -y` or a tree URL like `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. |
 
 ---
