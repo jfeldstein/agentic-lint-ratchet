@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Run lint-ratchet (composite action)
-        uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
+        uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@lint-ratchet-action-v1.1.0
         env:
           # Required when agent: pi
           LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}

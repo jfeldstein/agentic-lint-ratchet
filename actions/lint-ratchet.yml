@@ -22,7 +22,7 @@ inputs:
       Semver of the skills/lint-ratchet artifact expected by this action release (must match
       skills/lint-ratchet/package.json at the same git ref). Documentation only unless you add checks.
     required: false
-    default: "1.0.0"
+    default: "1.1.0"
   action_repository:
     description: Repository that contains the lint-ratchet runner code
     required: false
