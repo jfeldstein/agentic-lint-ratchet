@@ -37,7 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
+      - name: Checkout repository (for local action)
+        uses: actions/checkout@v4
       - name: Run lint-ratchet (composite action)
-        uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
+        uses: ./.github/actions/lint-ratchet
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
