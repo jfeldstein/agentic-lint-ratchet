@@ -1,10 +1,17 @@
 import js from "@eslint/js";
 import globals from "globals";
 
-// Active coverage: scripts/**/*.mjs, eslint.config.js (flat config; same rules).
+// Path scope (see .github/workflows/ci.yml): active vs deferred vs ratchet queue.
+//
+// Active: scripts/**/*.mjs, eslint.config.js (flat config; same rules).
+//
+// Depth-first ratchet queue (JS — enable in order with CI):
+//   1. scripts/**/*.mjs — done.
+//   2. eslint.config.js — done.
+//   (No other application JS trees in this chart; YAML uses yamllint, not ESLint.)
+//
 // YAML: yamllint (.yamllint, npm run lint:yaml): .github/, .lint-ratchet.config.yml,
 //   config/, workflows/, Chart.yaml, actions/*.yml, values.yaml — not templates/** (Helm).
-// Deferred for ESLint: docs/, templates/, test/, Chart.lock, PROMPT.md, README.md until JS tooling maps them.
 export default [
   {
     ignores: ["**/node_modules/**"],

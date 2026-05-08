@@ -7,8 +7,13 @@ readme = "README.md"
 [tool.ruff]
 target-version = "py311"
 src = ["scripts"]
-# Active coverage: scripts/ (see CI). YAML: yamllint via npm run lint:yaml — .github/, root
-# config, config/, workflows/, Chart.yaml, actions/, values.yaml (not templates/ — Helm templating).
+# Path scope: scripts/**/*.py only (CI runs Ruff when any exist; see .github/workflows/ci.yml).
+#
+# Depth-first ratchet queue (Python):
+#   1. scripts/**/*.py — active when present.
+#   (No other Python packages in this repository.)
+#
+# YAML prose uses yamllint (npm run lint:yaml), not Ruff.
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP"]
