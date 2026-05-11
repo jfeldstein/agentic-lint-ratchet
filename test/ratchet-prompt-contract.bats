@@ -8,17 +8,20 @@
   [ "$status" -eq 0 ]
 }
 
-@test "scope bite behavior reuses tighten controls" {
-  run grep -q "Scope steps reuse the existing tighten bounds" skills/lint-ratchet/resources/RATCHET.md
+@test "scope and tighten behavior use generalized bite controls" {
+  run grep -q "Scope and tighten steps share bite bounds" skills/lint-ratchet/resources/RATCHET.md
   [ "$status" -eq 0 ]
 
-  run grep -q "max_tighten_steps_without_source_changes" skills/lint-ratchet/resources/RATCHET.md
+  run grep -q "max_bite_steps_without_source_changes" skills/lint-ratchet/resources/RATCHET.md
   [ "$status" -eq 0 ]
 
-  run grep -q "Scope behavior uses the tighten controls" config/.lint-ratchet.config.example.yml
+  run grep -q "Scope and tighten behavior use the same bite controls" config/.lint-ratchet.config.example.yml
   [ "$status" -eq 0 ]
 
-  run bash -lc "! grep -R \"max_scope_\" .lint-ratchet.config.yml config/.lint-ratchet.config.example.yml skills/lint-ratchet/resources/RATCHET.md"
+  run grep -q "max_bite_fix_files" .lint-ratchet.config.yml
+  [ "$status" -eq 0 ]
+
+  run bash -lc "! grep -R \"max_scope_\\|max_tighten_\" .lint-ratchet.config.yml config/.lint-ratchet.config.example.yml skills/lint-ratchet/resources/RATCHET.md"
   [ "$status" -eq 0 ]
 }
 
