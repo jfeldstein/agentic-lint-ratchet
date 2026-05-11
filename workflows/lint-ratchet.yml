@@ -40,3 +40,5 @@ jobs:
         uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@main
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
+          # Match the git ref you pin in `uses:` so the runner checkout (prompt, npm, scripts) stays in sync.
+          action_ref: main
