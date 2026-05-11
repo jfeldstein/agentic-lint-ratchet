@@ -9,21 +9,12 @@ repo:
 
 setup:
   max_fix_files_without_ignore: 10
-  # Scope behavior (optional):
-  # - max_scope_steps_without_source_changes: if scope peels do not "bite"
-  #   (no source edits required), still open a PR after this many in-order steps
-  #   to lock in accumulated config progress; next run continues.
-  # - max_scope_fix_files / max_scope_fix_loc: if a scope peel would require
-  #   too-large cleanup, revert that peel, document the backoff, and choose the
-  #   next smaller in-order leaf when available.
-  max_scope_steps_without_source_changes: 3
-  max_scope_fix_files: 10
-  max_scope_fix_loc: 400
-  # Tighten behavior (optional):
-  # - max_tighten_steps_without_source_changes: if tightening doesn't "bite" (no source edits required),
-  #   still open a PR after this many tighten steps to lock in config progress; next run continues.
-  # - max_tighten_fix_files / max_tighten_fix_loc: if a tighten would require too-large cleanup,
-  #   revert that tighten and choose a smaller bite.
+  # Bite behavior (optional):
+  # Scope behavior uses the tighten controls: if scope peels or tightening do not "bite"
+  # (no source edits required), still open a PR after this many in-order steps to lock in
+  # accumulated config progress; next run continues.
+  # If a bite would require too-large cleanup, revert that bite, document the backoff,
+  # and choose the next smaller in-order leaf / tighten step when available.
   max_tighten_steps_without_source_changes: 3
   max_tighten_fix_files: 10
   max_tighten_fix_loc: 400
