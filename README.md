@@ -17,6 +17,8 @@ This repository ships **three ways** to run lint ratcheting against a GitHub rep
 
 To vendor the composite action instead of referencing this repo by ref, copy [`actions/lint-ratchet.yml`](actions/lint-ratchet.yml) to `.github/actions/lint-ratchet/action.yml` in the target repo and point the workflow `uses:` at `./.github/actions/lint-ratchet`.
 
+**Pinned action refs:** Target repos that pin `uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@lint-ratchet-action-v...` keep using the prompt bundled in that tag. After prompt changes such as bite-seeking scope behavior, update the workflow `uses:` ref and the action input `action_ref` together, or use `@main` if you intentionally want the latest prompt.
+
 **Config in the target repo:** mirror [config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml) to `.lint-ratchet.config.yml` at the repo root, or set **`LINT_RATCHET_CONFIG_PATH`** / the action’s `config_path` input to another path.
 
 ---

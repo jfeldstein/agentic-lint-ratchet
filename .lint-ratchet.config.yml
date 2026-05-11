@@ -7,6 +7,6 @@ repo:
 
 setup:
   max_fix_files_without_ignore: 10
-  max_tighten_steps_without_source_changes: 3
-  max_tighten_fix_files: 10
-  max_tighten_fix_loc: 400
+  max_bite_steps_without_source_changes: 3
+  max_bite_fix_files: 10
+  max_bite_fix_loc: 400
