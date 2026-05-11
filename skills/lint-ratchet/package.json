@@ -1,6 +1,6 @@
 {
   "name": "lint-ratchet-skill",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Lint-ratchet skill. Release tag drives pins in Helm values and the composite GitHub Action."
 }

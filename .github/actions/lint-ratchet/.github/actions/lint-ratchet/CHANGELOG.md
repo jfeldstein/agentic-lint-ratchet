@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.1](https://github.com/jfeldstein/agentic-lint-ratchet/compare/lint-ratchet-action-v1.2.0...lint-ratchet-action-v1.2.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* **ci:** allow ratchet to read checks/statuses ([b314ce1](https://github.com/jfeldstein/agentic-lint-ratchet/commit/b314ce1a7183d3159d502ec06d089e68468104b0))
+* **docs:** keep agent input and remove broad Cursor branding ([ef2ab80](https://github.com/jfeldstein/agentic-lint-ratchet/commit/ef2ab80434224ba7e6e00a250e0c448647b1e5ed))
+* retain agent input; remove broad Cursor branding ([3dc9f3a](https://github.com/jfeldstein/agentic-lint-ratchet/commit/3dc9f3abb124f358be8ef1c1d35ea618d0e7f3c4))
+
 ## [1.2.0](https://github.com/jfeldstein/agentic-lint-ratchet/compare/lint-ratchet-action-v1.1.0...lint-ratchet-action-v1.2.0) (2026-05-07)
 
 
