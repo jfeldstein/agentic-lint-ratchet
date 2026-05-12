@@ -1,0 +1,4 @@
+# Shell lint scope (npm run lint:sh; CI):
+#   Active: scripts/**/*.sh
+# Ratchet queue (deferred):
+#   - test/**/*.bats — Bats @test syntax is not handled by shellcheck; keep deferred here.

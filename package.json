@@ -8,7 +8,8 @@
     "ratchet": "node scripts/run-ratchet.mjs",
     "lint:js": "eslint scripts/**/*.mjs eslint.config.js",
     "lint:yaml": "python3 -c \"import yamllint\" 2>/dev/null || python3 -m pip install -q yamllint==1.35.1; python3 -m yamllint .github .lint-ratchet.config.yml config workflows Chart.yaml actions values.yaml",
-    "pretest": "npm run lint:yaml",
+    "lint:sh": "bash -c 'mapfile -t f < <(find scripts -type f -name \"*.sh\" 2>/dev/null | sort); if [ ${#f[@]} -eq 0 ]; then echo \"no shell scripts under scripts/\"; exit 0; else shellcheck \"${f[@]}\"; fi'",
+    "pretest": "npm run lint:yaml && npm run lint:sh",
     "test": "bats --recursive test"
   },
   "repository": {
