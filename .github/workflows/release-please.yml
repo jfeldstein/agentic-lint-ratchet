@@ -1,6 +1,5 @@
-# Opens release PRs from conventional commits; on merge, creates GitHub Releases and git tags (e.g. v1.2.3).
+# Opens release PRs from conventional commits; on merge, creates GitHub Releases and git tags (e.g. lint-ratchet-action-v1.0.0).
 # Uses GITHUB_TOKEN (release PRs/tags do not re-trigger workflows).
-# For CI on release PRs, add a PAT secret and pass it via `token:` instead.
 
 name: release-please
 

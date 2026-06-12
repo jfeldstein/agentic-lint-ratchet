@@ -1,52 +1,61 @@
-# agentic-lint-ratchet
+# agentic-ratchets
 
-This repository ships **three ways** to run lint ratcheting against a GitHub repo: a **composable GitHub Action** (scheduled PR bot), a **Helm chart** that wraps [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) for in-cluster deployment, and a **local skill** you can install locally. The chart’s HTTP `CronJob` today only **wakes** the agent process; a fully autonomous in-cluster ratchet (checkout, `gh`, CI babysitting on the cluster) is **documented as a product gap** in [docs/in-cluster-bot.md](docs/in-cluster-bot.md).
+Progressive improvements, unobtrusive DX — autonomous **agentic ratchets** that open throttled PRs toward a quality goal, one slice at a time.
 
----
+## What are agentic ratchets?
 
-## If you operate the repo (humans)
+Each ratchet shares the same operating model:
 
-**Fastest path — GitHub Actions**
+- **Throttled PRs** — at most one in-flight ratchet-owned branch per config signature until CI is green and the PR can merge
+- **Incremental progress** — small PRs toward a defined end state, not big-bang refactors
+- **Signed PR bodies** — a config-derived token for dedupe and scheduling
+- **Agent execution** — scheduled CI installs the Cursor Agent CLI and runs the ratchet prompt against your repo
 
-1. Copy [workflows/lint-ratchet.yml](workflows/lint-ratchet.yml) to `.github/workflows/lint-ratchet.yml` in the **target** repository (this repo keeps an equivalent under [.github/workflows/lint-ratchet.yml](.github/workflows/lint-ratchet.yml) for itself).
-2. In **Repository → Settings → Actions → General → Workflow permissions**: enable **Read and write permissions** and **Allow GitHub Actions to create and approve pull requests**.
-3. Add repository secret **`CURSOR_API_KEY`** under **Settings → Secrets → Actions**.
-4. Choose runtime in workflow `with.agent`:
-   - `agent: cursor` (default) requires `CURSOR_API_KEY` and optionally `cursor_model`.
-   - `agent: pi` requires job/step `env:` entries for `LITELLM_BASE_URL`, `LITELLM_API_KEY`, and `PI_MODEL`.
+See [docs/ratchets.md](docs/ratchets.md) for the full model.
 
-To vendor the composite action instead of referencing this repo by ref, copy [`actions/lint-ratchet.yml`](actions/lint-ratchet.yml) to `.github/actions/lint-ratchet/action.yml` in the target repo and point the workflow `uses:` at `./.github/actions/lint-ratchet`.
+## Available ratchets
 
-**Pinned action refs:** Target repos that pin `uses: jfeldstein/agentic-lint-ratchet/.github/actions/lint-ratchet@lint-ratchet-action-v...` keep using the prompt bundled in that tag. After prompt changes such as bite-seeking scope behavior, update the workflow `uses:` ref and the action input `action_ref` together, or use `@main` if you intentionally want the latest prompt.
+| Name | Location | Status |
+|------|----------|--------|
+| **agentic-lint-ratchet** | [`.github/actions/lint-ratchet`](.github/actions/lint-ratchet) ([`RATCHET.md`](.github/actions/lint-ratchet/RATCHET.md)) · [docs/lint-ratchet.md](docs/lint-ratchet.md) | Available |
+| **agentic-mutation-testing-ratchet** | [`.github/actions/mutation-testing-ratchet`](.github/actions/mutation-testing-ratchet) ([`RATCHET.md`](.github/actions/mutation-testing-ratchet/RATCHET.md)) · [docs/mutation-testing-ratchet.md](docs/mutation-testing-ratchet.md) | Available |
 
-**Config in the target repo:** mirror [config/.lint-ratchet.config.example.yml](config/.lint-ratchet.config.example.yml) to `.lint-ratchet.config.yml` at the repo root, or set **`LINT_RATCHET_CONFIG_PATH`** / the action’s `config_path` input to another path.
+**agentic-lint-ratchet** adds and progressively tightens opinionated linting (Setup → Ratchet phases). Target config: `.lint-ratchet.config.yml`; branches: `lint-ratchet/*`.
 
----
+**agentic-mutation-testing-ratchet** adds and expands mutation testing (Setup → Ratchet phases). Target config: `.mutation-ratchet.config.yml`; branches: `mutation-ratchet/*`.
 
-## If you integrate or extend this repo (agents and tools)
+## Adopt lint-ratchet in your repo
 
-| Concern | Location |
-| -------- | -------- |
-| Ratchet instructions read by the deployed agent | [skills/lint-ratchet/resources/RATCHET.md](skills/lint-ratchet/resources/RATCHET.md) — wired via Helm **`agent.systemPromptFile`**; edit in git, not inline in `values.yaml` (library chart allows exactly one of `systemPrompt` or `systemPromptFile`). |
-| Helm values for the agent | `values.yaml` — tunables under **`agent:`**; `templates/agent.yaml` includes `declarative-agent.system` (same pattern as upstream [hello-world](https://github.com/jfeldstein/declarative-agent-library-chart/tree/main/examples/hello-world)). |
-| Composite action runtime | Uses env **`RATCHET_PROMPT_FILE`** from the checked-out repo at **`action_ref`**; does **not** depend on `npx skills add`. |
-| Supported agent runtimes | `cursor` and `pi` are implemented. `claude` and `opencode` are currently unsupported and fail fast with an explicit error. |
-| Optional local install | `npx skills add jfeldstein/agentic-lint-ratchet#<git-ref> -a cursor -y` or a tree URL like `https://github.com/jfeldstein/agentic-lint-ratchet/tree/<tag>/skills/lint-ratchet`. |
+1. Add `.lint-ratchet.config.yml` with `repo.base_branch` (see [docs/lint-ratchet.md](docs/lint-ratchet.md)).
+2. Enable [required GitHub Actions permissions](#required-allow-github-actions-to-create-pull-requests).
+3. Copy the consumer workflow ([`docs/examples/lint-ratchet.workflow.yml`](docs/examples/lint-ratchet.workflow.yml)) into `.github/workflows/` and set **`pull_request_workflows`** to your CI workflow filenames.
+4. Add `workflow_dispatch` + `ref` checkout to each listed workflow (bot PRs do not trigger normal `pull_request` CI).
 
----
+Reference: [agentic-construct#785](https://github.com/invisible-tech/agentic-construct/pull/785).
 
-## Helm (cluster)
+## Required: allow GitHub Actions to create pull requests
 
-**Dependency:** [Chart.yaml](Chart.yaml) resolves the library chart from `file://../declarative-agent-library-chart/helm/chart`. Clone [declarative-agent-library-chart](https://github.com/jfeldstein/declarative-agent-library-chart) beside this repo or change the URL, then:
+In the **target** repository:
 
-```bash
-helm dependency build --skip-refresh
-```
+**Settings → Actions → General → Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests**.
 
-Build or supply the image referenced by **`agent.image`** (see the library chart README), then install:
+Without this, the agent cannot open ratchet PRs.
 
-```bash
-helm upgrade --install lint-ratchet . -n <namespace> --wait -f values.yaml
-```
+## Adopt mutation-testing-ratchet in your repo
 
-When **`triggerCron.enabled`** is true (default), a **CronJob** sends **`POST /api/v1/trigger`** to the agent Service. That wake **does not** clone a repo or open PRs by itself; behavior limits and the path to a real worker are in [docs/in-cluster-bot.md](docs/in-cluster-bot.md). Tune or disable via **`triggerCron`** in `values.yaml`.
+1. Add `.mutation-ratchet.config.yml` with `repo.base_branch` (see [docs/mutation-testing-ratchet.md](docs/mutation-testing-ratchet.md)).
+2. Enable [required GitHub Actions permissions](#required-allow-github-actions-to-create-pull-requests).
+3. Copy the consumer workflow ([`docs/examples/mutation-testing-ratchet.workflow.yml`](docs/examples/mutation-testing-ratchet.workflow.yml)) into `.github/workflows/` and set **`pull_request_workflows`** to your CI workflow filenames (tests, mutation, coverage).
+4. Add `workflow_dispatch` + `ref` checkout to each listed workflow (bot PRs do not trigger normal `pull_request` CI).
+
+## Ownership
+
+- **Owner (Backstage):** group:default/invisible-tech
+- **Primary owner:** jordan.feldstein
+- **Email:** jordan.feldstein@invisible.email
+- **Slack:** [agentic-ratchets](https://invisible.enterprise.slack.com/archives/C0B68EQFLFJ)
+
+## Documentation
+
+* **Human / Backstage TechDocs:** `docs/` (see `mkdocs.yml`). Published via the `backstage.io/techdocs-ref` annotation in `catalog-info.yaml`.
+* **Agents & conventions:** See [agents.md](agents.md) and [.dev/rules/main.md](.dev/rules/main.md).

@@ -1,0 +1,48 @@
+# Copy to .github/workflows/lint-ratchet.yml in your target repository.
+# Full setup: https://github.com/invisible-tech/agentic-ratchets/blob/main/docs/lint-ratchet.md
+#
+# Prerequisites:
+#   • .lint-ratchet.config.yml (repo.repository, repo.base_branch)
+#   • Settings → Actions → allow GitHub Actions to create and approve pull requests
+#   • Each workflow in pull_request_workflows: workflow_dispatch + required `ref` input on checkout
+#
+# Bot PRs do not trigger normal pull_request CI (GITHUB_TOKEN). The composite action
+# dispatches your workflows after a successful ratchet run when pull_request_workflows is set.
+
+name: Lint ratchet
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly; adjust timezone/cadence
+  workflow_dispatch:
+    inputs:
+      cursor_api_key:
+        description: Override CURSOR_API_KEY for this run (optional)
+        required: false
+        type: string
+
+concurrency:
+  group: lint-ratchet-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  lint-ratchet:
+    runs-on: ubuntu-latest
+    steps:
+      # Pin @ref to a release tag (e.g. lint-ratchet-action-v1.0.0) or @main until published.
+      - uses: invisible-tech/agentic-ratchets/.github/actions/lint-ratchet@main
+        with:
+          cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
+          # cursor_model: composer-2
+          pull_request_workflows: |
+            lint.yml
+            coverage.yaml
+          # config_path: .lint-ratchet.config.yml
+          # ratchet_branch_prefix: lint-ratchet/

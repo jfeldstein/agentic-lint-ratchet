@@ -1,4 +1,4 @@
-# Lint-ratchet — forwards inputs to ratchet-runner with lint-specific defaults.
+# Mutation-testing-ratchet — forwards inputs to ratchet-runner with mutation-specific defaults.
 #
 # The calling workflow must have:
 #   permissions:
@@ -12,8 +12,8 @@
 #   → "Allow GitHub Actions to create and approve pull requests"
 # See: https://github.com/invisible-tech/agentic-ratchets#required-allow-github-actions-to-create-pull-requests
 
-name: Lint Ratchet
-description: Run the lint-ratchet agent against a checked-out repository
+name: Mutation Testing Ratchet
+description: Run the mutation-testing-ratchet agent against a checked-out repository
 
 inputs:
   agent:
@@ -25,17 +25,17 @@ inputs:
     required: false
   skill_version:
     description: >
-      Semver of this action release (must match .github/actions/lint-ratchet/version.txt
+      Semver of this action release (must match .github/actions/mutation-testing-ratchet/version.txt
       at the same git ref). Documentation only unless you add checks.
     required: false
     default: "1.0.0"
   config_path:
     description: >
-      Path to the lint-ratchet config file (relative to target repo root).
-      Overridden by the LINT_RATCHET_CONFIG_PATH env var if set.
+      Path to the mutation-ratchet config file (relative to target repo root).
+      Overridden by the MUTATION_RATCHET_CONFIG_PATH env var if set.
       If the file does not exist, the dedupe preflight is skipped (fresh repo).
     required: false
-    default: .lint-ratchet.config.yml
+    default: .mutation-ratchet.config.yml
   prompt_file:
     description: Prompt markdown path relative to this composite action (github.action_path)
     required: false
@@ -47,22 +47,22 @@ inputs:
   pull_request_workflows:
     description: >
       Newline-separated workflow filenames under .github/workflows/ to dispatch via
-      workflow_dispatch after a successful ratchet run (e.g. lint.yml). Each must declare
+      workflow_dispatch after a successful ratchet run (e.g. test.yml, mutation.yml). Each must declare
       workflow_dispatch with a required ref input and checkout that ref. Leave empty to skip.
     required: false
     default: ""
   ratchet_branch_prefix:
     description: Head branch prefix for ratchet-owned PRs (used when dispatching CI)
     required: false
-    default: "lint-ratchet/"
+    default: "mutation-ratchet/"
 
 runs:
   using: composite
   steps:
     - uses: invisible-tech/agentic-ratchets/.github/actions/ratchet-runner@develop
       with:
-        pr_signature_prefix: lint-ratchet
-        ratchet_env_prefix: LINT_RATCHET
+        pr_signature_prefix: mutation-ratchet
+        ratchet_env_prefix: MUTATION_RATCHET
         agent: ${{ inputs.agent }}
         cursor_api_key: ${{ inputs.cursor_api_key }}
         prompt_action_path: ${{ github.action_path }}

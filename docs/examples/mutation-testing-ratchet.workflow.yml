@@ -1,0 +1,43 @@
+# Copy to .github/workflows/mutation-testing-ratchet.yml in your target repository.
+# Full setup: https://github.com/invisible-tech/agentic-ratchets/blob/main/docs/mutation-testing-ratchet.md
+#
+# Prerequisites:
+#   • .mutation-ratchet.config.yml (repo.repository, repo.base_branch)
+#   • Settings → Actions → allow GitHub Actions to create and approve pull requests
+#   • Each workflow in pull_request_workflows: workflow_dispatch + required `ref` input on checkout
+#
+# Bot PRs do not trigger normal pull_request CI (GITHUB_TOKEN). The composite action
+# dispatches your workflows after a successful ratchet run when pull_request_workflows is set.
+
+name: Mutation testing ratchet
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly; adjust timezone/cadence
+  workflow_dispatch:
+
+concurrency:
+  group: mutation-testing-ratchet-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  mutation-testing-ratchet:
+    runs-on: ubuntu-latest
+    steps:
+      # Pin @ref to a release tag when published (e.g. mutation-testing-ratchet-action-v1.0.0).
+      - uses: invisible-tech/agentic-ratchets/.github/actions/mutation-testing-ratchet@main
+        with:
+          cursor_api_key: ${{ secrets.CURSOR_API_KEY }}
+          # cursor_model: composer-2
+          pull_request_workflows: |
+            test.yml
+            mutation.yml
+          # config_path: .mutation-ratchet.config.yml
+          # ratchet_branch_prefix: mutation-ratchet/

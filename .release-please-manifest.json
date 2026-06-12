@@ -1,5 +1,4 @@
 {
-  "skills/lint-ratchet": "1.2.1",
-  ".": "1.2.1",
-  ".github/actions/lint-ratchet": "1.2.1"
+  ".github/actions/lint-ratchet": "1.0.0",
+  ".github/actions/mutation-testing-ratchet": "1.0.0"
 }
