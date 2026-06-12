@@ -1,0 +1,189 @@
+# Shared composite for agentic ratchets: preflight, checkout, CLI, agent, CI dispatch.
+# Ratchet wrappers (e.g. lint-ratchet) set pr_signature_prefix and ratchet_env_prefix defaults.
+#
+# Calling workflow permissions:
+#   actions: write, contents: write, pull-requests: write, checks: read, statuses: read
+# Target repo must allow Actions to create and approve pull requests.
+
+name: Ratchet runner
+description: Shared runner — preflight dedupe, checkout, Cursor CLI, agent, optional CI dispatch
+
+inputs:
+  pr_signature_prefix:
+    description: >
+      Token prefix before the config hash (PR body contains #<prefix>-<64-hex>).
+      Example lint-ratchet for #lint-ratchet-<sha256>.
+    required: true
+  ratchet_env_prefix:
+    description: >
+      Prefix for exported env vars (CONFIG_PATH, SIGNATURE, REPOSITORY, BASE_BRANCH).
+      Example LINT_RATCHET for LINT_RATCHET_SIGNATURE.
+    required: true
+  agent:
+    description: Agent runtime to use (cursor or pi)
+    required: false
+    default: cursor
+  cursor_api_key:
+    description: Cursor runtime API key (user or service account)
+    required: false
+  action_repository:
+    description: Repository that contains ratchet prompts and actions
+    required: false
+    default: invisible-tech/agentic-ratchets
+  action_ref:
+    description: Git ref for the prompt checkout
+    required: false
+    default: main
+  prompt_checkout_path:
+    description: Workspace subdirectory for the agentic-ratchets checkout
+    required: false
+    default: ratchet-prompt
+  prompt_action_path:
+    description: >
+      When set, read prompt_file from this directory (bundled beside the ratchet wrapper).
+      Skips checkout of action_repository. Pass github.action_path from the wrapper.
+    required: false
+    default: ""
+  prompt_file:
+    description: >
+      Prompt markdown path relative to prompt_action_path when set, else relative to the
+      agentic-ratchets checkout (prompt_checkout_path).
+    required: true
+  cursor_model:
+    description: Cursor model id (cursor runtime only)
+    required: false
+    default: composer-2
+  pull_request_workflows:
+    description: >
+      Newline-separated workflow filenames under .github/workflows/ to dispatch via
+      workflow_dispatch after a successful ratchet run. Leave empty to skip.
+    required: false
+    default: ""
+  ratchet_branch_prefix:
+    description: Head branch prefix for ratchet-owned PRs (preflight dedupe and CI dispatch)
+    required: false
+    default: ""
+  config_path:
+    description: >
+      Ratchet config path in the target repo (relative to target root). Skips dedupe when
+      missing (fresh repo). Overridden by <ratchet_env_prefix>_CONFIG_PATH if preset.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Record workflow run start
+      shell: bash
+      run: |
+        started="${{ github.run_started_at }}"
+        if [[ -z "$started" ]]; then
+          started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        fi
+        echo "RUN_STARTED_AT=$started" >> "$GITHUB_ENV"
+
+    - name: Mask API key
+      if: ${{ inputs.cursor_api_key != '' }}
+      shell: bash
+      run: echo "::add-mask::${{ inputs.cursor_api_key }}"
+
+    - name: Checkout target repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        path: target
+
+    - name: Preflight (dedupe)
+      id: preflight
+      shell: bash
+      working-directory: target
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RATCHET_ENV_PREFIX: ${{ inputs.ratchet_env_prefix }}
+        PR_SIGNATURE_PREFIX: ${{ inputs.pr_signature_prefix }}
+        CONFIG_PATH: ${{ inputs.config_path }}
+        RATCHET_BRANCH_PREFIX: ${{ inputs.ratchet_branch_prefix }}
+        PULL_REQUEST_WORKFLOWS: ${{ inputs.pull_request_workflows }}
+      run: bash "${{ github.action_path }}/preflight.sh"
+
+    - name: Checkout agentic-ratchets (prompt)
+      if: >-
+        ${{ steps.preflight.outputs.should_run == 'true' &&
+        inputs.prompt_action_path == '' }}
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
+        fetch-depth: 1
+        path: ${{ inputs.prompt_checkout_path }}
+
+    - name: Install Cursor Agent CLI
+      if: steps.preflight.outputs.should_run == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        curl https://cursor.com/install -fsS | bash
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Configure git identity for agent commits
+      if: steps.preflight.outputs.should_run == 'true'
+      shell: bash
+      working-directory: target
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+    - name: Run ratchet agent (cursor)
+      id: ratchet-agent
+      shell: bash
+      if: ${{ steps.preflight.outputs.should_run == 'true' && inputs.agent == 'cursor' }}
+      env:
+        CURSOR_API_KEY: ${{ inputs.cursor_api_key }}
+        GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_WORKSPACE: ${{ github.workspace }}/target
+      run: |
+        set -euo pipefail
+        if [[ -z "${CURSOR_API_KEY:-}" ]]; then
+          echo "::error::cursor_api_key input (or CURSOR_API_KEY env) is required for agent: cursor."
+          exit 1
+        fi
+        command -v agent
+        if [[ -n "${{ inputs.prompt_action_path }}" ]]; then
+          PROMPT_FILE="${{ inputs.prompt_action_path }}/${{ inputs.prompt_file }}"
+        else
+          PROMPT_FILE="${{ github.workspace }}/${{ inputs.prompt_checkout_path }}/${{ inputs.prompt_file }}"
+        fi
+        if [[ ! -f "$PROMPT_FILE" ]]; then
+          echo "::error::Prompt file not found: $PROMPT_FILE"
+          exit 1
+        fi
+        agent -p "$(cat "$PROMPT_FILE")" \
+          --workspace "${{ github.workspace }}/target" \
+          --trust --force \
+          --model "${{ inputs.cursor_model }}"
+
+    - name: Dispatch pull request CI workflows
+      if: >-
+        ${{ steps.preflight.outputs.should_run == 'true' &&
+        steps.ratchet-agent.outcome == 'success' &&
+        inputs.pull_request_workflows != '' }}
+      shell: bash
+      working-directory: target
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        RUN_STARTED_AT: ${{ env.RUN_STARTED_AT }}
+        PULL_REQUEST_WORKFLOWS: ${{ inputs.pull_request_workflows }}
+        RATCHET_BRANCH_PREFIX: ${{ inputs.ratchet_branch_prefix }}
+        RATCHET_ENV_PREFIX: ${{ inputs.ratchet_env_prefix }}
+        PR_SIGNATURE_PREFIX: ${{ inputs.pr_signature_prefix }}
+        CONFIG_PATH: ${{ inputs.config_path }}
+      run: bash "${{ github.action_path }}/dispatch-pr-ci.sh"
+
+    - name: Unsupported agent runtime
+      shell: bash
+      if: ${{ steps.preflight.outputs.should_run == 'true' && inputs.agent != 'cursor' }}
+      run: |
+        echo "::error::Agent runtime '${{ inputs.agent }}' is not supported yet. Use agent: cursor."
+        exit 1

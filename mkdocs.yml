@@ -1,0 +1,9 @@
+site_name: agentic-ratchets Documentation
+plugins:
+  - techdocs-core
+nav:
+  - Home: index.md
+  - Agentic ratchets: ratchets.md
+  - Lint ratchet: lint-ratchet.md
+  - Mutation testing ratchet: mutation-testing-ratchet.md
+  - Roadmap: roadmap.md
