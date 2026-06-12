@@ -2,7 +2,7 @@
 
 **agentic-mutation-testing-ratchet** progressively adds and expands mutation testing in a target repository. It discovers existing mutation tooling, fills gaps with boring defaults, then runs **Setup → Ratchet (first time) → Ratchet (ongoing)** until intended code has meaningful mutation coverage on CI.
 
-The authoritative agent instructions are [`.github/actions/mutation-testing-ratchet/RATCHET.md`](https://github.com/invisible-tech/agentic-ratchets/blob/main/.github/actions/mutation-testing-ratchet/RATCHET.md) (shipped beside the composite action).
+The authoritative agent instructions are [`.github/actions/mutation-testing-ratchet/RATCHET.md`](../.github/actions/mutation-testing-ratchet/RATCHET.md) (shipped beside the composite action).
 
 ## Mechanics
 
@@ -11,7 +11,7 @@ The authoritative agent instructions are [`.github/actions/mutation-testing-ratc
 | Config file | `.mutation-ratchet.config.yml` in the **target** repo |
 | Branch prefix | `mutation-ratchet/` |
 | PR signature | `#mutation-ratchet-<64-char-hex>` = SHA-256 of entire config file |
-| Composite actions | [`.github/actions/mutation-testing-ratchet`](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/mutation-testing-ratchet) (calls shared [`ratchet-runner`](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/ratchet-runner)) |
+| Composite actions | [`.github/actions/mutation-testing-ratchet`](../.github/actions/mutation-testing-ratchet) (calls shared [`ratchet-runner`](../.github/actions/ratchet-runner)) |
 
 ## Config shape
 
@@ -33,7 +33,7 @@ See [`.github/actions/mutation-testing-ratchet/RATCHET.md`](../.github/actions/m
 
 ## Bootstrap environment
 
-CI sets these via the [mutation-testing-ratchet composite action](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/mutation-testing-ratchet). Reproduce locally when debugging.
+CI sets these via the [mutation-testing-ratchet composite action](../.github/actions/mutation-testing-ratchet). Reproduce locally when debugging.
 
 | Variable | Description |
 |----------|-------------|
@@ -57,7 +57,7 @@ export MUTATION_RATCHET_SIGNATURE="#mutation-ratchet-$(shasum -a 256 "$MUTATION_
 Setup checklist for the **target** repository (`repo.repository` must match that repo; the composite action checks out the workflow repo as the workspace).
 
 1. Commit `.mutation-ratchet.config.yml` with `repo.repository` and **`repo.base_branch`** (used when dispatching CI).
-2. Enable **Allow GitHub Actions to create and approve pull requests** ([README — required permissions](https://github.com/invisible-tech/agentic-ratchets#required-allow-github-actions-to-create-pull-requests)).
+2. Enable **Allow GitHub Actions to create and approve pull requests** ([README — required permissions](../README.md#required-allow-github-actions-to-create-pull-requests)).
 3. Add `.github/workflows/mutation-testing-ratchet.yml` that calls the composite action (template below).
 4. Pass **`pull_request_workflows`** with your CI workflow filenames, and wire those workflows for `workflow_dispatch` (see below).
 
@@ -71,7 +71,7 @@ Merge the mutation-testing-ratchet workflow to your default branch before relyin
 
 ### Preflight (dedupe)
 
-Before the agent runs, [ratchet-runner](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/ratchet-runner) preflight checks for an **open** signed PR on a branch matching `ratchet_branch_prefix` (default `mutation-ratchet/`). If one exists and **required checks are green**, the run is skipped (no second slice PR). If required checks are failing or pending, the run proceeds so the agent can **babysit** that PR. This matches the duplicate-PR guard in `.github/actions/mutation-testing-ratchet/RATCHET.md`.
+Before the agent runs, [ratchet-runner](../.github/actions/ratchet-runner) preflight checks for an **open** signed PR on a branch matching `ratchet_branch_prefix` (default `mutation-ratchet/`). If one exists and **required checks are green**, the run is skipped (no second slice PR). If required checks are failing or pending, the run proceeds so the agent can **babysit** that PR. This matches the duplicate-PR guard in `.github/actions/mutation-testing-ratchet/RATCHET.md`.
 
 ### Consumer workflow
 
@@ -80,7 +80,7 @@ Copy [docs/examples/mutation-testing-ratchet.workflow.yml](examples/mutation-tes
 | Input / knob | Purpose |
 |--------------|---------|
 | `pull_request_workflows` | Newline-separated workflow **filenames** under `.github/workflows/` (e.g. `test.yml`, `mutation.yml`); dispatched by the action after a successful agent run |
-| `uses:` `@ref` | Pin `invisible-tech/agentic-ratchets` ref on the composite action (e.g. `@main` or `mutation-testing-ratchet-action-v1.0.0`) |
+| `uses:` `@ref` | Pin `<org>/agentic-ratchets` ref on the composite action (e.g. `@main` or `mutation-testing-ratchet-action-v1.0.0`) |
 | `ratchet_branch_prefix` | Default `mutation-ratchet/`; must match ratchet branch names and your `pull_request` CI targets |
 | `cursor_api_key` | `CURSOR_API_KEY` secret |
 | `schedule` / `workflow_dispatch` | When the ratchet runs |
@@ -88,7 +88,7 @@ Copy [docs/examples/mutation-testing-ratchet.workflow.yml](examples/mutation-tes
 Example:
 
 ```yaml
-- uses: invisible-tech/agentic-ratchets/.github/actions/mutation-testing-ratchet@mutation-testing-ratchet-action-v1.0.0
+- uses: <org>/agentic-ratchets/.github/actions/mutation-testing-ratchet@mutation-testing-ratchet-action-v1.0.0
   with:
     cursor_api_key: ${{ secrets.CURSOR_API_KEY }}
     pull_request_workflows: |
@@ -98,7 +98,7 @@ Example:
 
 Until a release tag exists, use `@main`. See [docs/examples/mutation-testing-ratchet.workflow.yml](examples/mutation-testing-ratchet.workflow.yml).
 
-The [mutation-testing-ratchet](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/mutation-testing-ratchet) action forwards to [ratchet-runner](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/ratchet-runner) (`pr_signature_prefix: mutation-ratchet`, `ratchet_env_prefix: MUTATION_RATCHET`), which runs dedupe preflight, installs Cursor CLI, executes `agent -p` with the bundled [RATCHET.md](https://github.com/invisible-tech/agentic-ratchets/blob/main/.github/actions/mutation-testing-ratchet/RATCHET.md), and dispatches each listed workflow on the ratchet PR branch head.
+The [mutation-testing-ratchet](../.github/actions/mutation-testing-ratchet) action forwards to [ratchet-runner](../.github/actions/ratchet-runner) (`pr_signature_prefix: mutation-ratchet`, `ratchet_env_prefix: MUTATION_RATCHET`), which runs dedupe preflight, installs Cursor CLI, executes `agent -p` with the bundled [RATCHET.md](../.github/actions/mutation-testing-ratchet/RATCHET.md), and dispatches each listed workflow on the ratchet PR branch head.
 
 Omit `pull_request_workflows` (or leave empty) to skip dispatch — useful while bootstrapping before your CI supports `workflow_dispatch`.
 

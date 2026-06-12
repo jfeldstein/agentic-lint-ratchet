@@ -1,5 +1,5 @@
 # Copy to .github/workflows/lint-ratchet.yml in your target repository.
-# Full setup: https://github.com/invisible-tech/agentic-ratchets/blob/main/docs/lint-ratchet.md
+# Full setup: ../lint-ratchet.md
 #
 # Prerequisites:
 #   • .lint-ratchet.config.yml (repo.repository, repo.base_branch)
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Pin @ref to a release tag (e.g. lint-ratchet-action-v1.0.0) or @main until published.
-      - uses: invisible-tech/agentic-ratchets/.github/actions/lint-ratchet@main
+      - uses: <org>/agentic-ratchets/.github/actions/lint-ratchet@main
         with:
           cursor_api_key: ${{ inputs.cursor_api_key || secrets.CURSOR_API_KEY }}
           # cursor_model: composer-2

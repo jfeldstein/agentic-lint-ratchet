@@ -2,7 +2,7 @@
 
 **agentic-lint-ratchet** progressively adds and tightens opinionated linting in a target repository. It discovers existing linters, fills gaps with boring defaults, then runs **Setup → Ratchet (first time) → Ratchet (ongoing)** until all intended code is lint-clean on CI.
 
-The authoritative agent instructions are [`.github/actions/lint-ratchet/RATCHET.md`](https://github.com/invisible-tech/agentic-ratchets/blob/main/.github/actions/lint-ratchet/RATCHET.md) (shipped beside the composite action).
+The authoritative agent instructions are [`.github/actions/lint-ratchet/RATCHET.md`](../.github/actions/lint-ratchet/RATCHET.md) (shipped beside the composite action).
 
 ## Mechanics
 
@@ -11,7 +11,7 @@ The authoritative agent instructions are [`.github/actions/lint-ratchet/RATCHET.
 | Config file | `.lint-ratchet.config.yml` in the **target** repo |
 | Branch prefix | `lint-ratchet/` |
 | PR signature | `#lint-ratchet-<64-char-hex>` = SHA-256 of entire config file |
-| Composite action | [`.github/actions/lint-ratchet`](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/lint-ratchet) |
+| Composite action | [`.github/actions/lint-ratchet`](../.github/actions/lint-ratchet) |
 
 ## Config shape
 
@@ -33,7 +33,7 @@ See [`.github/actions/lint-ratchet/RATCHET.md`](../.github/actions/lint-ratchet/
 
 ## Bootstrap environment
 
-CI sets these via the [lint-ratchet composite action](https://github.com/invisible-tech/agentic-ratchets/tree/main/.github/actions/lint-ratchet). Reproduce locally when debugging.
+CI sets these via the [lint-ratchet composite action](../.github/actions/lint-ratchet). Reproduce locally when debugging.
 
 | Variable | Description |
 |----------|-------------|
@@ -57,11 +57,9 @@ export LINT_RATCHET_SIGNATURE="#lint-ratchet-$(shasum -a 256 "$LINT_RATCHET_CONF
 Setup checklist for the **target** repository (`repo.repository` must match that repo; the composite action checks out the workflow repo as the workspace).
 
 1. Commit `.lint-ratchet.config.yml` with `repo.repository` and **`repo.base_branch`** (used when dispatching CI).
-2. Enable **Allow GitHub Actions to create and approve pull requests** ([README — required permissions](https://github.com/invisible-tech/agentic-ratchets#required-allow-github-actions-to-create-pull-requests)).
+2. Enable **Allow GitHub Actions to create and approve pull requests** ([README — required permissions](../README.md#required-allow-github-actions-to-create-pull-requests)).
 3. Add `.github/workflows/lint-ratchet.yml` that calls the composite action (template below).
 4. Pass **`pull_request_workflows`** with your CI workflow filenames, and wire those workflows for `workflow_dispatch` (see below).
-
-Reference consumer implementation: [invisible-tech/agentic-construct#785](https://github.com/invisible-tech/agentic-construct/pull/785).
 
 ### Why you need `pull_request_workflows`
 
@@ -82,7 +80,7 @@ Copy [docs/examples/lint-ratchet.workflow.yml](examples/lint-ratchet.workflow.ym
 | Input / knob | Purpose |
 |--------------|---------|
 | `pull_request_workflows` | Newline-separated workflow **filenames** under `.github/workflows/` (e.g. `lint.yml`, `coverage.yaml`); dispatched by the action after a successful agent run |
-| `uses:` `@ref` | Pin `invisible-tech/agentic-ratchets` ref on the composite action (e.g. `@main` or `lint-ratchet-action-v1.0.0`) |
+| `uses:` `@ref` | Pin `<org>/agentic-ratchets` ref on the composite action (e.g. `@main` or `lint-ratchet-action-v1.0.0`) |
 | `ratchet_branch_prefix` | Default `lint-ratchet/`; must match ratchet branch names and your `pull_request` CI targets |
 | `cursor_api_key` | `CURSOR_API_KEY` secret |
 | `schedule` / `workflow_dispatch` | When the ratchet runs |
@@ -90,7 +88,7 @@ Copy [docs/examples/lint-ratchet.workflow.yml](examples/lint-ratchet.workflow.ym
 Example:
 
 ```yaml
-- uses: invisible-tech/agentic-ratchets/.github/actions/lint-ratchet@lint-ratchet-action-v1.0.0
+- uses: <org>/agentic-ratchets/.github/actions/lint-ratchet@lint-ratchet-action-v1.0.0
   with:
     cursor_api_key: ${{ secrets.CURSOR_API_KEY }}
     pull_request_workflows: |
@@ -100,7 +98,7 @@ Example:
 
 Until a release tag exists, use `@main`. See [docs/examples/lint-ratchet.workflow.yml](examples/lint-ratchet.workflow.yml).
 
-The action installs Cursor CLI, runs dedupe preflight, executes `agent -p` with the bundled [RATCHET.md](https://github.com/invisible-tech/agentic-ratchets/blob/main/.github/actions/lint-ratchet/RATCHET.md), then dispatches each listed workflow on the ratchet PR branch head.
+The action installs Cursor CLI, runs dedupe preflight, executes `agent -p` with the bundled [RATCHET.md](../.github/actions/lint-ratchet/RATCHET.md), then dispatches each listed workflow on the ratchet PR branch head.
 
 Omit `pull_request_workflows` (or leave empty) to skip dispatch — useful while bootstrapping before your CI supports `workflow_dispatch`.
 
@@ -130,7 +128,7 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha || github.sha }}
 ```
 
-Repeat for every job that should run on ratchet PRs (lint, test, coverage, etc.). Names and triggers differ per repo — see [agentic-construct `lint.yml` / `coverage.yaml` changes](https://github.com/invisible-tech/agentic-construct/pull/785/files).
+Repeat for every job that should run on ratchet PRs (lint, test, coverage, etc.). Names and triggers differ per repo.
 
 ### Bootstrap without CI dispatch
 

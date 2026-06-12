@@ -40,7 +40,7 @@ flowchart LR
 | **Target repo** | Workflow in same repo as `repo.repository`; Actions may open PRs; secrets for `CURSOR_API_KEY` | Config file content and `setup` knobs |
 | **This repo** | Family docs, release pattern | `.github/actions/<ratchet>/` (prompt beside action, e.g. `RATCHET.md`) |
 
-Architecture detail: [.dev/docs/architecture.md](https://github.com/invisible-tech/agentic-ratchets/blob/main/.dev/docs/architecture.md).
+Architecture detail: [.dev/docs/architecture.md](../.dev/docs/architecture.md).
 
 ## Ratchets in this repo
 

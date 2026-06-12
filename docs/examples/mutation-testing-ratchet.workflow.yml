@@ -1,5 +1,5 @@
 # Copy to .github/workflows/mutation-testing-ratchet.yml in your target repository.
-# Full setup: https://github.com/invisible-tech/agentic-ratchets/blob/main/docs/mutation-testing-ratchet.md
+# Full setup: ../mutation-testing-ratchet.md
 #
 # Prerequisites:
 #   • .mutation-ratchet.config.yml (repo.repository, repo.base_branch)
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Pin @ref to a release tag when published (e.g. mutation-testing-ratchet-action-v1.0.0).
-      - uses: invisible-tech/agentic-ratchets/.github/actions/mutation-testing-ratchet@main
+      - uses: <org>/agentic-ratchets/.github/actions/mutation-testing-ratchet@main
         with:
           cursor_api_key: ${{ secrets.CURSOR_API_KEY }}
           # cursor_model: composer-2

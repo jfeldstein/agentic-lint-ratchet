@@ -31,8 +31,6 @@ See [docs/ratchets.md](docs/ratchets.md) for the full model.
 3. Copy the consumer workflow ([`docs/examples/lint-ratchet.workflow.yml`](docs/examples/lint-ratchet.workflow.yml)) into `.github/workflows/` and set **`pull_request_workflows`** to your CI workflow filenames.
 4. Add `workflow_dispatch` + `ref` checkout to each listed workflow (bot PRs do not trigger normal `pull_request` CI).
 
-Reference: [agentic-construct#785](https://github.com/invisible-tech/agentic-construct/pull/785).
-
 ## Required: allow GitHub Actions to create pull requests
 
 In the **target** repository:
@@ -47,13 +45,6 @@ Without this, the agent cannot open ratchet PRs.
 2. Enable [required GitHub Actions permissions](#required-allow-github-actions-to-create-pull-requests).
 3. Copy the consumer workflow ([`docs/examples/mutation-testing-ratchet.workflow.yml`](docs/examples/mutation-testing-ratchet.workflow.yml)) into `.github/workflows/` and set **`pull_request_workflows`** to your CI workflow filenames (tests, mutation, coverage).
 4. Add `workflow_dispatch` + `ref` checkout to each listed workflow (bot PRs do not trigger normal `pull_request` CI).
-
-## Ownership
-
-- **Owner (Backstage):** group:default/invisible-tech
-- **Primary owner:** jordan.feldstein
-- **Email:** jordan.feldstein@invisible.email
-- **Slack:** [agentic-ratchets](https://invisible.enterprise.slack.com/archives/C0B68EQFLFJ)
 
 ## Documentation
 
