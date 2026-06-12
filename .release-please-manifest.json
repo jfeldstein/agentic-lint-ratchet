@@ -1,4 +1,4 @@
 {
-  ".github/actions/lint-ratchet": "1.0.0",
+  ".github/actions/lint-ratchet": "1.1.0",
   ".github/actions/mutation-testing-ratchet": "1.0.0"
 }
